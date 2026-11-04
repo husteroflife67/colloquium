@@ -7,7 +7,9 @@ import { platformKey, validatePlatform } from "./platform-state";
 import { progressWritten, announceProgress } from "../progress-events";
 import { linearKey, validateLinear } from "../linear/model";
 
-export const backupKeys = [...Object.values(localKeys), "predel-v1", "predel-v1-questions", platformKey, linearKey];
+import { examKey, validateExams } from "../linear/exam-model";
+
+export const backupKeys = [...Object.values(localKeys), "predel-v1", "predel-v1-questions", platformKey, linearKey, examKey];
 export type UnifiedBackup = { format: "colloquium-platform-backup"; version: 1; data: Record<string, unknown> };
 const ids = new Set(items.map(i => i.id));
 export function exportBackup(): UnifiedBackup {
@@ -32,6 +34,7 @@ export function parseBackup(raw: unknown): Record<string, unknown> {
     if (value == null) continue;
     if (key === "predel-v1") result[key] = validateImport(value, ids, items);
     else if (key === linearKey) result[key] = validateLinear(value);
+    else if (key === examKey) result[key] = validateExams(value);
     else if (key === "predel-v1-questions") result[key] = validateQuestions(value);
     else if (key === platformKey) {
       result[key] = validatePlatform(value);
@@ -64,6 +67,11 @@ export function prepareImport(incoming: Record<string, unknown>, choice: "local"
       if (local) validatePlatform(local);
       const sessions = mergeRecord(Object.fromEntries((local?.sessions ?? []).map((s: any) => [s.id, s])), Object.fromEntries((next.sessions ?? []).map((s: any) => [s.id, s])));
       merged = { version: 1, bookmarks: [...new Set([...(local?.bookmarks ?? []), ...next.bookmarks])], ...(Object.keys(sessions).length ? { sessions: Object.values(sessions).sort((a, b) => Date.parse(b.started) - Date.parse(a.started)) } : {}) };
+    }
+    else if (key === examKey) {
+      if (local) validateExams(local);
+      const attempts = mergeRecord(Object.fromEntries((local?.attempts ?? []).map((a: any) => [a.id, a])), Object.fromEntries(next.attempts.map((a: any) => [a.id, a])));
+      merged = { version: 1, attempts: Object.values(attempts).sort((a, b) => b.startedAt - a.startedAt) };
     }
     else if (key === linearKey) {
       if (local) validateLinear(local);

@@ -72,7 +72,7 @@ test("legacy import previews conflicts, preserves both histories and question ra
   const download = await downloadPromise; const stream = await download.createReadStream(); const chunks = []; for await (const chunk of stream!) chunks.push(chunk);
   const exported = JSON.parse(Buffer.concat(chunks).toString());
   expect(exported.format).toBe("colloquium-platform-backup");
-  expect(Object.keys(exported.data)).toHaveLength(7);
+  expect(Object.keys(exported.data)).toHaveLength(8);
   expect(JSON.stringify(exported)).not.toContain("access_token");
   expect(exported.data["predel-v1"].history).toHaveLength(1);
   expect(await page.evaluate(() => localStorage.getItem("colloquium-before-import-v1"))).toBeTruthy();

@@ -40,3 +40,15 @@ test("production linear course serves sources and exact card routes under the re
   expect(response.ok()).toBe(true);
   expect(response.headers()['content-type']).toContain('image/webp');
 });
+
+test('production mock exam starts five tasks and restores the deadline under the repository prefix', async ({ page, baseURL }) => {
+  await page.goto(`${baseURL}#/linear/exam`);
+  await page.getByRole('button', { name: 'Начать · 140 минут', exact: true }).click();
+  await expect(page.locator('.linear-exam-task')).toHaveCount(5);
+  await expect(page.getByRole('timer')).toBeVisible();
+  const deadline = await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts[0].deadline);
+  await page.reload();
+  await expect(page.locator('.linear-exam-task')).toHaveCount(5);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts[0].deadline)).toBe(deadline);
+  await expect(page.locator('.linear-exam-solution')).toHaveCount(0);
+});

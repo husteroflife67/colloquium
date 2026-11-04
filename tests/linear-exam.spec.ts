@@ -1,0 +1,125 @@
+import { test, expect } from '@playwright/test';
+
+test('five-task exam keeps its 140-minute deadline and notes, opens only conditions during the attempt, then offers self-review', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-11-04T12:00:00Z') });
+  await page.goto('/#/linear/study');
+  await page.getByRole('link', { name: /Пробная контрольная/ }).click();
+  await page.getByLabel('Сложность варианта').selectOption('medium');
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await expect(page.locator('.linear-exam-task')).toHaveCount(5);
+  await expect(page.locator('.linear-exam-solution')).toHaveCount(0);
+  const original = await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts[0]);
+  expect(original.deadline - original.startedAt).toBe(140 * 60 * 1000);
+  expect(new Set(original.items).size).toBe(5);
+  await page.getByLabel('Ответ и заметки к № 1', { exact: true }).fill('Мой ответ: x = 2');
+  await page.locator('.linear-exam-task').first().getByRole('button', { name: /Открыть условие/ }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('dialog').locator('img').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.clock.fastForward(60 * 60 * 1000);
+  await expect(page.getByRole('timer')).toHaveText(/01:(19|20):\d{2}/);
+  await page.reload();
+  await expect(page.getByLabel('Ответ и заметки к № 1', { exact: true })).toHaveValue('Мой ответ: x = 2');
+  await expect(page.getByRole('timer')).toHaveText(/01:(19|20):\d{2}/);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts[0].items)).toEqual(original.items);
+  await page.getByRole('button', { name: 'Завершить досрочно', exact: true }).click();
+  await page.getByRole('button', { name: 'Продолжить решать', exact: true }).click();
+  await expect(page.locator('.linear-exam-solution')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Завершить досрочно', exact: true }).click();
+  await page.getByRole('button', { name: 'Завершить и открыть разбор', exact: true }).click();
+  await expect(page.getByText('Попытка завершена', { exact: true })).toBeVisible();
+  await expect(page.getByRole('timer')).toHaveCount(0);
+  await expect(page.locator('.linear-exam-solution')).toHaveCount(5);
+  await expect(page.getByLabel('Ответ и заметки к № 1', { exact: true })).toHaveAttribute('readonly', '');
+  await page.locator('.linear-exam-solution summary').first().click();
+  await expect(page.locator('.linear-exam-solution .linear-math').first()).toBeVisible();
+  await expect(page.locator('.katex-error')).toHaveCount(0);
+  await page.getByRole('group', { name: 'Результат № 1', exact: true }).getByLabel('Повторить', { exact: true }).check();
+  await page.reload();
+  await expect(page.getByRole('group', { name: 'Результат № 1', exact: true }).getByLabel('Повторить', { exact: true })).toBeChecked();
+  expect(await page.evaluate(() => localStorage.getItem('linear-algebra-v1'))).toBeNull();
+  await page.getByRole('button', { name: 'Новый вариант', exact: true }).click();
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await expect(page.locator('.linear-exam-task')).toHaveCount(5);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts.length)).toBe(2);
+  await expect(page.getByRole('timer')).toHaveText(/02:(19|20):\d{2}/);
+});
+
+test('timeout completes the attempt on schedule and after time spent outside the course', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-11-04T12:00:00Z') });
+  await page.goto('/#/linear/exam');
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await page.getByLabel('Ответ и заметки к № 2', { exact: true }).fill('Черновик');
+  await page.getByRole('button', { name: 'Все темы', exact: true }).click();
+  await page.clock.fastForward(141 * 60 * 1000);
+  await page.getByRole('button', { name: 'Пробная контрольная', exact: true }).click();
+  await expect(page.getByText('Время вышло', { exact: true })).toBeVisible();
+  await expect(page.locator('.linear-exam-solution')).toHaveCount(5);
+  await expect(page.getByLabel('Ответ и заметки к № 2', { exact: true })).toHaveValue('Черновик');
+  const attempt = await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts[0]);
+  expect(attempt.finishedAt).toBe(attempt.deadline);
+  expect(attempt.finishReason).toBe('timeout');
+  await page.getByRole('button', { name: 'Новый вариант', exact: true }).click();
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await page.clock.fastForward(140 * 60 * 1000);
+  await expect(page.getByText('Время вышло', { exact: true })).toBeVisible();
+  await expect(page.getByRole('timer')).toHaveCount(0);
+});
+
+test('exam attempts round-trip through unified backup and old backups preserve them', async ({ page }) => {
+  await page.goto('/#/linear/exam');
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await page.getByLabel('Ответ и заметки к № 1', { exact: true }).fill('Из резервной копии');
+  const original = await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!));
+  await page.getByRole('link', { name: 'Все курсы', exact: true }).click();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Экспорт всех курсов', exact: true }).click();
+  const stream = await (await download).createReadStream(); const chunks = []; for await (const chunk of stream!) chunks.push(chunk);
+  const backup = JSON.parse(Buffer.concat(chunks).toString());
+  expect(backup.data['linear-exams-v1']).toEqual(original);
+  await page.evaluate(() => localStorage.removeItem('linear-exams-v1'));
+  await page.reload();
+  await page.getByLabel('Импорт прогресса платформы').setInputFiles({ name: 'exam.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  await page.getByRole('button', { name: 'Объединить прогресс', exact: true }).click();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!))).toEqual(original);
+  delete backup.data['linear-exams-v1'];
+  await page.getByLabel('Импорт прогресса платформы').setInputFiles({ name: 'old.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  await page.getByRole('button', { name: 'Объединить прогресс', exact: true }).click();
+  await page.getByRole('link', { name: 'Продолжить линейную алгебру', exact: true }).click();
+  await page.getByRole('button', { name: 'Пробная контрольная', exact: true }).click();
+  await expect(page.getByLabel('Ответ и заметки к № 1', { exact: true })).toHaveValue('Из резервной копии');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-exams-v1')!).attempts[0].deadline)).toBe(original.attempts[0].deadline);
+});
+
+test('the exam works on narrow screens and a second tab cannot edit a finished attempt', async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/#/linear/exam');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await expect(page.locator('.linear-exam-task')).toHaveCount(5);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const other = await context.newPage();
+  await other.goto('/#/linear/exam');
+  await other.getByLabel('Ответ и заметки к № 1', { exact: true }).fill('Вторая вкладка');
+  await expect(page.getByLabel('Ответ и заметки к № 1', { exact: true })).toHaveValue('Вторая вкладка');
+  await other.getByRole('button', { name: 'Завершить досрочно', exact: true }).click();
+  await other.getByRole('button', { name: 'Завершить и открыть разбор', exact: true }).click();
+  await expect(page.getByText('Попытка завершена', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Ответ и заметки к № 1', { exact: true })).toHaveAttribute('readonly', '');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('a storage failure never starts an unsaved exam or overwrites existing progress', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('linear-algebra-v1', JSON.stringify({ version: 1, done: { 'П82': true } }));
+    const setItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value) { if (key === 'linear-exams-v1') throw new DOMException('Full', 'QuotaExceededError'); return setItem.call(this, key, value); };
+  });
+  await page.goto('/#/linear/exam');
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  await expect(page.getByRole('alert')).toContainText('Не удалось сохранить попытку');
+  await expect(page.getByRole('timer')).toHaveCount(0);
+  await expect(page.locator('.linear-exam-task')).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem('linear-exams-v1'))).toBeNull();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-algebra-v1')!).done)).toEqual({ 'П82': true });
+});
