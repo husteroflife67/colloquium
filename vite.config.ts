@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => {
       { name: "discrete-course", test: /src\/data\/course\.json/ },
       { name: "discrete-practice", test: /src\/data\/practice\.json/ },
       { name: "discrete-plan", test: /src\/data\/preparation-plan\.json/ },
+      { name: "linear-solutions", test: /src\/linear\/solutions\.json/ },
       { name: "vendor", test: /node_modules/ },
     ] } } } },
   };

@@ -27,3 +27,16 @@ test("production search and feedback keep the deployment prefix and review route
   await page.getByRole("link", { name: "Разобрать сложное", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Разобрать сложное." })).toBeVisible();
 });
+
+test("production linear course serves sources and exact card routes under the repository prefix", async ({ page, request, baseURL }) => {
+  await page.goto(`${baseURL}#/linear/study?item=%D0%9F82`);
+  await expect(page.locator('.linear-task')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Показать решение', exact: true }).click();
+  await expect(page.locator('.linear-solution .katex').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Условие', exact: true }).click();
+  const path = await page.locator('.linear-dialog img').getAttribute('src');
+  expect(new URL(path!, baseURL).pathname).toContain('/colloquium-discrete-1module-hseami/linear/sources/');
+  const response = await request.get(new URL(path!, baseURL).href);
+  expect(response.ok()).toBe(true);
+  expect(response.headers()['content-type']).toContain('image/webp');
+});

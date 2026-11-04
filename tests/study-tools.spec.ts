@@ -76,7 +76,7 @@ test("recovery rates only after reveal, resumes, retains original histories, and
   expect(saved.practice.progress["K3-1"]).toBe("repeat");
   await page.goto("/#/mistakes"); await expect(page.getByText("Разобрано в тренировке", { exact: true })).toHaveCount(1);
   await expect(page.getByText("2 материалов для тренировки")).toBeVisible();
-  await page.goto("/"); const downloadPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "Экспорт обоих курсов" }).click();
+  await page.goto("/"); const downloadPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "Экспорт всех курсов" }).click();
   const stream = await (await downloadPromise).createReadStream(); const chunks = []; for await (const chunk of stream!) chunks.push(chunk); const backup = JSON.parse(Buffer.concat(chunks).toString());
   expect(backup.data["colloquium-platform-v1"].sessions[0].entries).toHaveLength(2);
   await page.evaluate(() => localStorage.setItem("colloquium-platform-v1", JSON.stringify({ version: 1, bookmarks: [] })));

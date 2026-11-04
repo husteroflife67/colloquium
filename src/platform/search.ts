@@ -3,6 +3,7 @@ import { practice } from "../practice-model";
 import { items } from "../calculus/content";
 import { materials, materialKey, materialLink, type Material, type CourseId } from "./catalog";
 import { studyContent } from "./study-content";
+import { solutionText } from "../linear/content";
 
 export type SearchKind = "definition" | "theory" | "practice" | "oral";
 export type SearchDocument = { key: string; material: Material; kind: SearchKind; title: string; body: string; topic: string; href: string };
@@ -22,7 +23,9 @@ export const searchDocuments: SearchDocument[] = materials.flatMap(m => {
   } else if (m.course === "discrete") {
     const q = practice.items.find(q => q.id === m.id)!;
     extra = [q.number, ...q.prerequisites, ...q.steps, ...q.transitions, q.idea].join(" ");
-  } else {
+  } else if (m.course === "linear") {
+    extra = solutionText(m.id);
+  } else if (m.course === "calculus") {
     const i = items.find(i => i.id === m.id)!;
     extra = [...i.board, ...i.mistakes, ...(i.supplements ?? []).flatMap(s => [s.title, s.idea, ...s.proof])].join(" ");
   }

@@ -231,3 +231,8 @@ body { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+.platform-card-linear .platform-course-art { background: #e3d8f3; }
+.platform-card-linear .platform-action { background: #7955a7; color: white; border-color: #7955a7; }
+.platform-card-linear .platform-action:hover { background: #67458f; }
+.study-result-linear .study-result-meta > span:first-child { background: #e9dff6; color: #6f4c9a; }

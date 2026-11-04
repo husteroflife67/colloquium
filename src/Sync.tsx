@@ -116,11 +116,11 @@ export function CalculusSyncSettings() {
   const snapshot = useSyncExternalStore(engine.subscribe, engine.getSnapshot);
   return <section className="panel">
     <h2>Синхронизация матанализа</h2>
-    <p>Один аккаунт для обоих курсов. Оценки, черновики, чек-листы, расписания повторений, уточнения и завершённые билеты матанализа сохраняются отдельно от дискретной математики. Закладки и отдельная история тренировок по ошибкам пока хранятся на устройстве и входят в общую резервную копию.</p>
+    <p>Один аккаунт для дискретной математики и матанализа. Оценки, черновики, чек-листы, расписания повторений, уточнения и завершённые билеты матанализа сохраняются отдельно от дискретной математики. Прогресс линейной алгебры, закладки и отдельная история тренировок по ошибкам пока хранятся на устройстве и входят в общую резервную копию.</p>
     <p role="status">{snapshot.message}</p>
     {!value.session && <p><a href="#/discrete/sync">Войти в общий аккаунт</a></p>}
     {value.session && <button className="secondary" onClick={() => void engine.sync()}>Синхронизировать матанализ</button>}
-    <p><a href="#/home">Экспорт и импорт обоих курсов</a></p>
+    <p><a href="#/home">Экспорт и импорт всех курсов</a></p>
     {snapshot.conflicts.map(c => <div className="hint" data-conflict={c.key} key={c.key}><h3>{calculusConflictLabel(c.key)}</h3><p>На устройстве: {calculusValueLabel(c.local)}</p><p>В аккаунте: {calculusValueLabel(c.remote)}</p><button className="secondary" onClick={() => engine.resolve(c.key, "local")}>Оставить на устройстве</button>{" "}<button className="secondary" onClick={() => engine.resolve(c.key, "cloud")}>Взять из аккаунта</button></div>)}
   </section>;
 }

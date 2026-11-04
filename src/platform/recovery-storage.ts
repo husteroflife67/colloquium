@@ -7,6 +7,7 @@ import { progressWritten, announceProgress } from "../progress-events";
 import { materialKey, type Material } from "./catalog";
 import { platformKey, platformChanged, readPlatform, validatePlatform, type RecoveryRating, type RecoverySession } from "./platform-state";
 import { buildJournal } from "./journal";
+import { linearKey, loadLinear } from "../linear/model";
 export function readCalculus() {
   const raw = localStorage.getItem("predel-v1");
   return raw ? validateImport(JSON.parse(raw), new Set(items.map(i => i.id)), items) : emptyData();
@@ -29,6 +30,9 @@ export function saveRecovery(session: Pick<RecoverySession, "id" | "started">, m
     data.ratings[material.id] = next;
     data.schedules = { ...(data.schedules ?? {}), [material.id]: scheduleReview(data.schedules?.[material.id], next, now) };
     value = data;
+  } else if (material.course === "linear") {
+    key = linearKey; const data = loadLinear();
+    value = { version: 1, done: { ...data.done, [material.id]: rating === "understood" } };
   } else if (material.kind === "theory") {
     key = storageKey; const data = readSaved();
     value = { ...data, progress: { ...data.progress, [material.id]: ratedEntry(rating === "understood" ? "known" : "repeat") } };

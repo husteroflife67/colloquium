@@ -68,11 +68,11 @@ test("legacy import previews conflicts, preserves both histories and question ra
   expect(await page.evaluate(id => JSON.parse(localStorage.getItem("predel-v1")!).ratings[id], fact.id)).toBe("repeat");
   expect(await page.evaluate(id => JSON.parse(localStorage.getItem("predel-v1-questions")!)[id], question.id)).toBe("known");
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("discrete-study-v1")!))).toEqual(seed["discrete-study-v1"]);
-  const downloadPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "Экспорт обоих курсов" }).click();
+  const downloadPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "Экспорт всех курсов" }).click();
   const download = await downloadPromise; const stream = await download.createReadStream(); const chunks = []; for await (const chunk of stream!) chunks.push(chunk);
   const exported = JSON.parse(Buffer.concat(chunks).toString());
   expect(exported.format).toBe("colloquium-platform-backup");
-  expect(Object.keys(exported.data)).toHaveLength(6);
+  expect(Object.keys(exported.data)).toHaveLength(7);
   expect(JSON.stringify(exported)).not.toContain("access_token");
   expect(exported.data["predel-v1"].history).toHaveLength(1);
   expect(await page.evaluate(() => localStorage.getItem("colloquium-before-import-v1"))).toBeTruthy();

@@ -35,7 +35,7 @@ export function CourseTools({ course }: { course?: CourseId }) {
       {!course && <option value="" disabled>Выберите курс</option>}
       {Object.entries(courses).map(([id, c]) => <option key={id} value={id}>{c.title}</option>)}
     </select></label>
-    <div className="platform-header-links"><a className="study-header-search" href="#/search" aria-label="Поиск по двум курсам"><Search size={17} /><span>Поиск</span><kbd aria-hidden="true">Ctrl K</kbd></a><a href="#/bookmarks"><BookmarkIcon size={17} />Закладки</a><a href="#/mistakes"><NotebookPen size={17} />Журнал</a></div>
+    <div className="platform-header-links"><a className="study-header-search" href="#/search" aria-label="Поиск по всем курсам"><Search size={17} /><span>Поиск</span><kbd aria-hidden="true">Ctrl K</kbd></a><a href="#/bookmarks"><BookmarkIcon size={17} />Закладки</a><a href="#/mistakes"><NotebookPen size={17} />Журнал</a></div>
   </header>;
 }
 export function Bookmark(material: Material) {
