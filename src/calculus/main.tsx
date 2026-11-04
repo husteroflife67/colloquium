@@ -1,6 +1,8 @@
+import { CourseOverview } from "../platform/CourseOverview";
+import { lastMaterial } from "../platform/workspace-preferences";
+import { rememberMaterial } from "../platform/workspace-preferences";
 import { MaterialActions } from "../platform/MaterialActions";
 import { oralTargets } from "../platform/study-content";
-import { LearningArt } from "../platform/LearningArt";
 import React, { useState, useEffect, useRef } from "react";
 
 import { MathText } from "./MathText";
@@ -33,7 +35,7 @@ import {
 } from "lucide-react";
 import "katex/dist/katex.min.css";
 import courseStyle from "./style.css?inline";
-import { CourseTools, useCoursePage, Bookmark } from "../platform/course-tools";
+import { workspaceSections, ResumeMaterial, CourseTools, useCoursePage, Bookmark } from "../platform/course-tools";
 import { CalculusSyncSettings } from "../Sync";
 import { saveProgress, useProgressReload } from "../progress-events";
 import { items, topics } from "./content";
@@ -84,20 +86,7 @@ const ratingLabels: Record<Rating, string> = {
   known: "Знаю",
   repeat: "Повторить",
 };
-const nav = [
-  ["dashboard", "Обзор", LayoutDashboard],
-  ["plan", "Тематический план", Map],
-  ["today", "На сегодня", RotateCcw],
-  ["definition", "Определения", Layers],
-  ["theory", "Теория и доказательства", BookOpen],
-  ["questions", "Вопросы принимающего", MessageCircle],
-  ["oral", "Устный экзаменатор", MessageCircle],
-  ["practice", "Практика", PenLine],
-  ["simulation", "Пробный коллоквиум", Timer],
-  ["history", "История", History],
-  ["sync", "Синхронизация", Settings],
-  ["settings", "Настройки", Settings],
-] as const;
+const nav = workspaceSections.calculus;
 const checklist = [
   "Изучил определения",
   "Понял формулировки",
@@ -118,12 +107,15 @@ export default function CalculusApp() {
       /* main export remains available */
     }
   }, [questionRatings]);
-  const [data, setData] = useState<Data>(load);
+  const [data, setData] = useState<Data>(() => {
+    const value = load();
+    try { const preference = localStorage.getItem("colloquium-ui-theme"); if (preference === "light" || preference === "dark") return { ...value, theme: preference }; } catch { /* Preserve the course theme. */ }
+    return value;
+  });
   const previousData = useRef<Data | undefined>(undefined);
   useProgressReload(KEY, load, value => setData(old => JSON.stringify(old) === JSON.stringify(value) ? old : value));
   useProgressReload(KEY + "-questions", loadQuestions, value => setQuestionRatings(old => JSON.stringify(old) === JSON.stringify(value) ? old : value));
   const [page, setPage] = useCoursePage<string>("calculus", "dashboard", nav.map(n => n[0]));
-  const [mobile, setMobile] = useState(false);
   const [search, setSearch] = useState("");
   const [topic, setTopic] = useState(0);
   const [filter, setFilter] = useState("all");
@@ -144,6 +136,11 @@ export default function CalculusApp() {
     }
     document.documentElement.dataset.theme = data.theme;
   }, [data]);
+  useEffect(() => {
+    const update = (event: Event) => setData(d => ({ ...d, theme: (event as CustomEvent<"light" | "dark">).detail }));
+    window.addEventListener("workspace-theme", update);
+    return () => window.removeEventListener("workspace-theme", update);
+  }, []);
   const rate = (id: string, r: Rating) =>
     setData((d) => ({
       ...d,
@@ -157,9 +154,13 @@ export default function CalculusApp() {
     setPage(p);
     setSelected(null);
     setSearch("");
-    setMobile(false);
     setFlash(false);
   };
+  useEffect(() => {
+    const update = (event: Event) => { const detail = (event as CustomEvent<{ course: string; route: string }>).detail; if (detail.course === "calculus") navigate(detail.route); };
+    window.addEventListener("workspace-navigate", update);
+    return () => window.removeEventListener("workspace-navigate", update);
+  });
   const mastered = items.filter((i) => data.ratings[i.id] === "known").length;
   const percent = Math.round((mastered / items.length) * 100);
   const weak = items.filter(
@@ -183,6 +184,7 @@ export default function CalculusApp() {
     );
   };
   const open = (i: Item) => {
+    rememberMaterial(`#/calculus/${i.kind}?item=${encodeURIComponent(i.id)}`);
     setPage(i.kind);
     setSelected(i.id);
     setFlash(false);
@@ -232,6 +234,8 @@ export default function CalculusApp() {
         : 0,
     );
   const detail = selected ? items.find((i) => i.id === selected) : undefined;
+  const readingSequence = detail ? items.filter(i => i.kind === detail.kind) : [];
+  const readingIndex = readingSequence.findIndex(i => i.id === detail?.id);
   const ratings = (id: string) => (
     <div className="ratings" aria-label="Самооценка">
       {(Object.keys(ratingLabels) as Rating[]).map((r) => (
@@ -249,88 +253,17 @@ export default function CalculusApp() {
     <div className="shell">
       <style>{courseStyle}</style>
       <CourseTools course="calculus" />
-      <aside className={mobile ? "sidebar open" : "sidebar"}>
-        <a
-          href="#"
-          className="brand"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("dashboard");
-          }}
-        >
-          <span className="brand-symbol">∴</span>
-          <span>
-            предел<span className="brand-sub">МАТЕМАТИЧЕСКИЙ АНАЛИЗ</span>
-          </span>
-        </a>
-        <div className="course">
-          <span className="eyebrow">ВАШ КУРС</span>
-          <b>Коллоквиум I</b>
-          <span>ПМИ · 1 курс · 2026/27</span>
-        </div>
-        <nav>
-          {nav.map(([p, l, Icon]) => (
-            <button
-              key={p}
-              className={page === p ? "nav active" : "nav"}
-              onClick={() => navigate(p)}
-            >
-              <Icon size={19} />
-              <span>{l}</span>
-              {p === "simulation" && <span className="dot" />}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="mini-progress">
-            <span>Ваш прогресс</span>
-            <b>{percent}%</b>
-          </div>
-          <div className="track">
-            <i style={{ width: percent + "%" }} />
-          </div>
-          <p>
-            {mastered} из {items.length} объектов освоено
-          </p>
-          <button
-            className="theme-toggle"
-            onClick={() =>
-              setData((d) => ({
-                ...d,
-                theme: d.theme === "light" ? "dark" : "light",
-              }))
-            }
-          >
-            {data.theme === "light" ? <Moon size={16} /> : <Sun size={16} />}{" "}
-            {data.theme === "light" ? "Тёмная тема" : "Светлая тема"}
-          </button>
-        </div>
-      </aside>
+
       <div className="main-shell">
-        <header className="topbar">
-          <button
-            className="mobile-button icon-button"
-            aria-label="Меню"
-            onClick={() => setMobile(!mobile)}
-          >
-            <Menu size={22} />
-          </button>
-          <span>
-            Математический анализ <ChevronRight size={13} /> <b>Коллоквиум I</b>
-          </span>
-          <div className="header-right">
-            <span className="local-dot" /> Данные на этом устройстве{" "}
-            <span className="avatar">Я</span>
-          </div>
-        </header>
+
         <main>
-          <div className="page-heading">
+          <div className="page-heading" style={page === "dashboard" || detail ? { display: "none" } : undefined}>
             <div>
               <div className="eyebrow">ПОДГОТОВКА К КОЛЛОКВИУМУ I</div>
               <h1>{nav.find((n) => n[0] === page)?.[1]}</h1>
               <p>
                 {page === "dashboard"
-                  ? "Большая теория начинается с понятных шагов."
+                  ? "Математический анализ · коллоквиум I"
                   : page === "plan"
                     ? "Связанные темы и ясные шаги — в вашем темпе."
                     : page === "simulation"
@@ -358,215 +291,21 @@ export default function CalculusApp() {
               </button>
             </div>
           )}
-          {page === "dashboard" && (
-            <>
-              <section className="hero">
-                <div>
-                  <span className="eyebrow">НЕ ЗАЗУБРИТЬ. ПОНЯТЬ.</span>
-                  <h2>
-                    От определения
-                    <br />к уверенному ответу.
-                  </h2>
-                  <p>
-                    21 вопрос программы, доказательства и практика.
-                    <br />
-                    Всё, чтобы у доски вы знали, с чего начать.
-                  </p>
-                  <button className="primary" onClick={() => navigate("plan")}>
-                    Начать подготовку <ArrowRight size={17} />
-                  </button>
-                  <span className="hero-note">
-                    Без расписания. В своём темпе.
-                  </span>
-                </div>
-                <div className="hero-art course-illustration" aria-hidden="true">
-                  <LearningArt variant="calculus" />
-                  <span className="art-caption">Маленькие шаги. Определённый предел.</span>
-                </div>
-              </section>
-              <div className="stats">
-                {[
-                  {
-                    label: "Общая готовность",
-                    value: percent + "%",
-                    sub: "Только ваша самооценка",
-                    icon: GraduationCap,
-                  },
-                  {
-                    label: "Определения",
-                    value: `${items.filter((i) => i.definitionNumber !== undefined && data.ratings[i.id] === "known").length} / ${items.filter((i) => i.definitionNumber !== undefined).length}`,
-                    sub: "Официальные определения и формулировки",
-                    icon: Layers,
-                  },
-                  {
-                    label: "Доказательства",
-                    value: `${items.filter((i) => i.kind === "theory" && i.required && data.ratings[i.id] === "known").length} / ${items.filter((i) => i.kind === "theory" && i.required).length}`,
-                    sub: "Обязательное воспроизведение",
-                    icon: BookOpen,
-                  },
-                  {
-                    label: "Пробные билеты",
-                    value: String(data.history.length),
-                    sub: data.history.length
-                      ? `Средний балл: ${(data.history.reduce((s, h) => s + h.base, 0) / data.history.length).toFixed(1)} / 8`
-                      : "Первый ответ ещё впереди",
-                    icon: Timer,
-                  },
-                ].map((s) => (
-                  <div className="stat" key={s.label}>
-                    <s.icon size={20} />
-                    <span>{s.label}</span>
-                    <strong>{s.value}</strong>
-                    <small>{s.sub}</small>
-                  </div>
-                ))}
-              </div>
-              <section className="panel today-shortcut">
-                <div>
-                  <h3>Что повторить сегодня</h3>
-                  <p>
-                    {
-                      dueItems(items, data.schedules ?? {}, Date.now()).filter(
-                        (i) => data.schedules?.[i.id],
-                      ).length
-                    }{" "}
-                    назначенных повторений доступно сейчас. Новые материалы — в
-                    порядке официального перечня.
-                  </p>
-                </div>
-                <button className="secondary" onClick={() => navigate("today")}>
-                  Открыть очередь <ArrowRight size={16} />
-                </button>
-              </section>
-              <div className="learning-summary">
-                <span>
-                  Практика:{" "}
-                  <b>
-                    {
-                      items.filter(
-                        (i) =>
-                          i.kind === "practice" &&
-                          data.ratings[i.id] === "known",
-                      ).length
-                    }{" "}
-                    / {items.filter((i) => i.kind === "practice").length}
-                  </b>
-                </span>
-                <span>
-                  Уточнения:{" "}
-                  <b>
-                    {
-                      Object.values(questionRatings).filter(
-                        (r) => r === "known",
-                      ).length
-                    }{" "}
-                    / {questionIds.size}
-                  </b>
-                </span>
-                <span>
-                  На повторение: <b>{weak.length}</b>
-                </span>
-              </div>
-              <div className="dashboard-grid">
-                <section>
-                  <div className="section-heading">
-                    <h2>Ваш маршрут</h2>
-                    <button
-                      className="text-button"
-                      onClick={() => navigate("plan")}
-                    >
-                      Все темы <ArrowRight size={15} />
-                    </button>
-                  </div>
-                  <div className="topic-list">
-                    {topics.slice(0, 4).map((t, i) => (
-                      <button
-                        className="topic-row"
-                        key={t.id}
-                        onClick={() => {
-                          navigate("plan");
-                          setTopic(t.id);
-                        }}
-                      >
-                        <span className="topic-number">0{i + 1}</span>
-                        <span className="topic-row-text">
-                          <b>{t.title}</b>
-                          <small>{t.subtitle}</small>
-                        </span>
-                        <span className="status-pill">{topicStatus(t.id)}</span>
-                        <ChevronRight size={16} />
-                      </button>
-                    ))}
-                  </div>
-                </section>
-                <section className="exam-card">
-                  <span className="eyebrow">ПРОВЕРКА БЕЗ СТРЕССА</span>
-                  <div className="exam-icon">
-                    <MessageCircle size={28} />
-                  </div>
-                  <h2>
-                    Как на коллоквиуме.
-                    <br />
-                    Только можно ещё раз.
-                  </h2>
-                  <p>
-                    Случайный билет, устные определения и таймер. Учебный режим
-                    поможет разобраться в формате.
-                  </p>
-                  <button
-                    className="secondary"
-                    onClick={() => navigate("simulation")}
-                  >
-                    Собрать тренировочный билет <ArrowUpRight size={16} />
-                  </button>
-                  <small>Авторские задания · не официальный пул</small>
-                </section>
-              </div>
-              <div className="bottom-grid">
-                <section className="panel">
-                  <div className="section-heading">
-                    <h3>Вернуться к сложному</h3>
-                    <span className="count">{weak.length}</span>
-                  </div>
-                  {weak.length ? (
-                    weak.slice(0, 3).map((i) => (
-                      <button
-                        className="weak-item"
-                        key={i.id}
-                        onClick={() => open(i)}
-                      >
-                        {i.title}
-                        <ArrowRight size={15} />
-                      </button>
-                    ))
-                  ) : (
-                    <p>
-                      Отмечайте «Не знаю» или «Повторить» — эти объекты появятся
-                      здесь.
-                    </p>
-                  )}
-                </section>
-                <section className="panel content-health">
-                  <span className="eyebrow">ПРОЗРАЧНОСТЬ МАТЕРИАЛОВ</span>
-                  <h3>По программе. С указанием источников.</h3>
-                  <p>
-                    Покрытие: {new Set(items.flatMap((i) => i.program)).size} /
-                    21 вопроса. Самопроверено:{" "}
-                    {items.filter((i) => i.review === "self_reviewed").length} /{" "}
-                    {items.length}. Это полнота материалов, а не ваша
-                    готовность.
-                  </p>
-                  <a
-                    href={`${import.meta.env.BASE_URL}sources/notes.pdf`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Открыть конспект лекций <ArrowUpRight size={14} />
-                  </a>
-                </section>
-              </div>
-            </>
-          )}
+          {page === "dashboard" && <CourseOverview title="Математический анализ" context="Коллоквиум I · твоя подготовка" symbol="∫" value={mastered} total={items.length} progressLabel="Самооценка «Знаю»"
+            metrics={[
+              { label: "Определения", value: `${items.filter(i => i.definitionNumber !== undefined && data.ratings[i.id] === "known").length} / ${items.filter(i => i.definitionNumber !== undefined).length}`, icon: BookOpen, action: () => navigate("definition") },
+              { label: "К повторению", value: dueItems(items, data.schedules ?? {}, Date.now()).filter(i => data.schedules?.[i.id]).length, icon: RotateCcw, action: () => navigate("today") },
+              { label: "Пробных билетов", value: data.history.length, icon: Layers, action: () => navigate("history") },
+              { label: "Доказательства", value: `${items.filter(i => i.kind === "theory" && i.required && data.ratings[i.id] === "known").length} / ${items.filter(i => i.kind === "theory" && i.required).length}`, icon: GraduationCap, action: () => navigate("theory") },
+            ]}
+            today={[
+              { title: "Повторить материалы", subtitle: `${dueItems(items, data.schedules ?? {}, Date.now()).filter(i => data.schedules?.[i.id]).length} назначенных повторений`, icon: RotateCcw, action: () => navigate("today") },
+              { title: "Пройти пробный билет", subtitle: "Проверка знаний и устный ответ", action: () => navigate("simulation") },
+            ]}
+            next={{ title: "Продолжить обучение", subtitle: lastMaterial("calculus")?.title ?? (items.find(i => data.ratings[i.id] !== "known") ?? items[0]).title, action: () => { const last = lastMaterial("calculus"); const next = items.find(i => i.id === last?.id) ?? items.find(i => data.ratings[i.id] !== "known") ?? items[0]; open(next); } }}
+            topics={topics.map(t => { const related = items.filter(i => i.topic === t.id); return { title: t.title, total: related.length, value: related.filter(i => data.ratings[i.id] === "known").length, action: () => { navigate("plan"); setTopic(t.id); } }; })} onTopics={() => navigate("plan")}>
+            <span>Практика: <b>{items.filter(i => i.kind === "practice" && data.ratings[i.id] === "known").length} / {items.filter(i => i.kind === "practice").length}</b></span><span>Уточнения: <b>{Object.values(questionRatings).filter(r => r === "known").length} / {questionIds.size}</b></span><button onClick={() => { navigate("theory"); setFilter("weak"); }}>Вернуться к сложному · {weak.length}</button><a href={`${import.meta.env.BASE_URL}sources/program.pdf`} target="_blank" rel="noreferrer">Программа курса ↗</a><a href={`${import.meta.env.BASE_URL}sources/notes.pdf`} target="_blank" rel="noreferrer">Конспект лекций ↗</a>
+          </CourseOverview>}
           {page === "plan" && (
             <>
               <div className="info-strip">
@@ -845,7 +584,7 @@ export default function CalculusApp() {
                       {detail.title}
                     </h2>
                     <Bookmark course="calculus" kind={detail.kind} id={detail.id} title={detail.title} />
-                    {detail.officialPrompt && (
+                    {detail.officialPrompt && flash && (
                       <div className="official-prompt">
                         <b>Вопрос из официального перечня:</b>
                         <p>
@@ -869,21 +608,6 @@ export default function CalculusApp() {
                         <a href="#oral">Уточнения</a>
                       </nav>
                     )}
-                    <div className="provenance">
-                      {detail.origin === "generated"
-                        ? detail.kind === "definition"
-                          ? "Ответ и пояснения составлены ИИ по формулировкам курса"
-                          : "Авторский материал · Доказательство составлено ИИ по формулировке курса"
-                        : "Материал курса"}
-                      <br />
-                      {detail.source}
-                      <br />
-                      <SourceLinks references={detail.references ?? []} />
-                      Статус: {detail.review} ·{" "}
-                      {detail.required
-                        ? "Требуется воспроизведение"
-                        : "Без обязательного доказательства"}
-                    </div>
                     {page === "definition" && flash ? (
                       <div className="flash-cover">
                         <Layers size={30} />
@@ -898,9 +622,25 @@ export default function CalculusApp() {
                       </div>
                     ) : (
                       <>
-                        <h3 id="statement">Формулировка</h3>
-                        <div className="statement">
-                          <MathText text={detail.statement} />
+                        <section className="material-statement"><h3 id="statement">{detail.kind === "definition" ? "Определение" : detail.kind === "theory" ? "Утверждение" : "Условие"}</h3>
+                        <div className="statement"><MathText text={detail.statement} /></div></section>
+                        <div className="material-references-row">
+                          {detail.officialPrompt && <details className="material-reference"><summary>Вопрос из официального перечня</summary><p><MathText text={detail.officialPrompt} /></p></details>}
+                          <details className="material-reference" id="material-sources"><summary>Источники и проверка</summary><div className="provenance">
+                      {detail.origin === "generated"
+                        ? detail.kind === "definition"
+                          ? "Ответ и пояснения составлены ИИ по формулировкам курса"
+                          : "Авторский материал · Доказательство составлено ИИ по формулировке курса"
+                        : "Материал курса"}
+                      <br />
+                      {detail.source}
+                      <br />
+                      <SourceLinks references={detail.references ?? []} />
+                      Статус: {detail.review === "self_reviewed" ? "Самопроверен" : "Требует проверки"} ·{" "}
+                      {detail.required
+                        ? "Требуется воспроизведение"
+                        : "Без обязательного доказательства"}
+                    </div></details>
                         </div>
                         {detail.examples.length > 0 && (
                           <>
@@ -1010,6 +750,7 @@ export default function CalculusApp() {
                           <p>{detail.review_notes}</p>
                         </details>
                         {ratings(detail.id)}
+                        {queue.length === 0 && <nav className="material-pagination" aria-label="Переходы между материалами"><button disabled={readingIndex <= 0} onClick={() => { open(readingSequence[readingIndex - 1]); window.scrollTo(0, 0); }}>← Предыдущий</button><span>{readingIndex + 1} / {readingSequence.length}</span><button disabled={readingIndex < 0 || readingIndex >= readingSequence.length - 1} onClick={() => { open(readingSequence[readingIndex + 1]); window.scrollTo(0, 0); }}>Следующий →</button></nav>}
                         {queue.length > 0 && (
                           <button
                             className="primary"
@@ -1361,7 +1102,7 @@ export default function CalculusApp() {
             </div>
           )}
           <footer>
-            предел <span>Понимание важнее запоминания.</span>
+            Коллоквиум <span>Понимание важнее запоминания.</span>
             <span>Коллоквиум I · Учебный тренажёр</span>
           </footer>
         </main>

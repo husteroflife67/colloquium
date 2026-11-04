@@ -1,10 +1,13 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { SyncProvider } from "./Sync";
+import { rememberMaterial } from "./platform/workspace-preferences";
+import { CommandPanel } from "./platform/CommandPanel";
 import Home from "./platform/Home";
 import studyToolsStyle from "./platform/study-tools.css?inline";
 import courseTheme from "./platform/course-theme.css?inline";
 import platformStyle from "./platform/platform.css?inline";
+import overviewStyle from "./platform/overview.css?inline";
 import designSystem from "./platform/design-system.css?inline";
 import "katex/dist/katex.min.css";
 import "@fontsource-variable/onest";
@@ -20,16 +23,15 @@ function Platform() {
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
   }, []);
-  useEffect(() => {
-    const shortcut = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.repeat && e.key.toLowerCase() === "k") { e.preventDefault(); if (location.hash.startsWith("#/search")) document.querySelector<HTMLInputElement>('[aria-label="Поиск по всем материалам"]')?.focus(); else location.hash = "#/search"; } };
-    window.addEventListener("keydown", shortcut); return () => window.removeEventListener("keydown", shortcut);
-  }, []);
+  useEffect(() => { rememberMaterial(hash); }, [hash]);
   const route = hash.split("?")[0];
   const course = hash.startsWith("#/calculus/") ? "calculus" : hash.startsWith("#/discrete/") ? "discrete" : hash.startsWith("#/linear/") ? "linear" : null;
   const view = hash === "#/bookmarks" ? "bookmarks" : hash === "#/mistakes" ? "mistakes" : "home";
-  useEffect(() => { document.title = course === "calculus" ? "Коллоквиум · Математический анализ" : course === "discrete" ? "Коллоквиум · Дискретная математика" : course === "linear" ? "Коллоквиум · Линейная алгебра" : "Коллоквиум · три курса"; if (course !== "calculus") delete document.documentElement.dataset.theme; }, [course]);
-  return <><Suspense fallback={<p className="platform-page" role="status">Загружаем курс…</p>}>
+  useEffect(() => { document.title = course === "calculus" ? "Коллоквиум · Математический анализ" : course === "discrete" ? "Коллоквиум · Дискретная математика" : course === "linear" ? "Коллоквиум · Линейная алгебра" : "Коллоквиум · три курса"; }, [course]);
+  return <><CommandPanel /><Suspense fallback={<p className="platform-page" role="status">Загружаем курс…</p>}>
     {course ? <div className={`platform-course platform-course-${course}`} key={course}>{course === "calculus" ? <Calculus /> : course === "linear" ? <Linear /> : <Discrete />}</div> : route === "#/search" ? <SearchPage /> : route === "#/recovery" ? <Recovery /> : <Home key={hash} view={view} />}
-  </Suspense><style>{`${platformStyle}\n${courseTheme}\n${studyToolsStyle}\n${designSystem}`}</style></>;
+  </Suspense><style>{`${platformStyle}\n${courseTheme}\n${studyToolsStyle}\n${designSystem}\n${overviewStyle}`}</style></>;
 }
+document.documentElement.dataset.focus = "false";
+try { document.documentElement.dataset.density = localStorage.getItem("colloquium-ui-density") === "compact" ? "compact" : "comfortable"; const theme = localStorage.getItem("colloquium-ui-theme"); document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light"; } catch { /* Default light theme. */ }
 createRoot(document.getElementById("root")!).render(<React.StrictMode><SyncProvider><Platform /></SyncProvider></React.StrictMode>);

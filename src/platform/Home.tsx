@@ -16,11 +16,15 @@ import { loadPractice } from "../practice-model";
 import { loadPlan, planProgress } from "../plan-model";
 import { ArrowUpRight, ArrowRight, Bookmark as BookmarkIcon, BookOpen, Layers3, Route, NotebookPen, ShieldCheck, Download, Upload, Sparkles, Search, Target, CheckCircle2 } from "lucide-react";
 import { linearCards, loadLinear } from "../linear/model";
-import { LearningArt } from "./LearningArt";
+
 
 function ProgressMeter({ value, total, label }: { value: number; total: number; label: string }) {
   const percent = Math.round(value / total * 100);
   return <div className="platform-meter"><div><span>{label}</span><strong>{percent}%</strong></div><div className="platform-meter-track" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={total} aria-valuenow={value}><i style={{ width: `${percent}%` }} /></div></div>;
+}
+
+function CourseCard({ course, symbol, stats, value, total, label, href, action }: { course: CourseId; symbol: string; stats: { value: string | number; label: string }[]; value: number; total: number; label: string; href: string; action: string }) {
+  return <section className={`platform-card platform-card-${course}`}><a className="platform-card-heading" href={`#/${course}/${courses[course].start}`}><span className="workspace-course-glyph">{symbol}</span><span><small>{course === "discrete" ? "Модуль 1" : "Модуль 2"}</small><h2>{courses[course].title}</h2></span><ArrowUpRight size={18} /></a><div className="platform-card-stats">{stats.map(stat => <div key={stat.label}><strong>{stat.value}</strong><span>{stat.label}</span></div>)}</div><ProgressMeter value={value} total={total} label={label} /><a className="platform-action" href={href}>{action}<ArrowRight size={18} /></a></section>;
 }
 
 function readSnapshot() {
@@ -64,41 +68,26 @@ export default function Home({ view }: { view: string }) {
     <main className="platform-page">
       <section className={`platform-intro ${view === "home" ? "platform-intro-home" : ""}`}>
         <div className="platform-intro-copy">
-          <div className="platform-kicker"><span /><span>{view === "home" ? "МЕСТО, ГДЕ СТАНОВИТСЯ ПОНЯТНО" : "ТВОЁ УЧЕБНОЕ ПРОСТРАНСТВО"}</span></div>
+          <div className="platform-kicker"><span /><span>{view === "home" ? "ЛИЧНОЕ УЧЕБНОЕ ПРОСТРАНСТВО" : "ТВОЁ УЧЕБНОЕ ПРОСТРАНСТВО"}</span></div>
           <h1>{view === "bookmarks" ? "Закладки" : view === "mistakes" ? "Журнал ошибок" : <>Продолжить <span>подготовку</span></>}</h1>
-          <p className="platform-lead">{view === "home" ? "От первого «что это?» до уверенного ответа у доски. Три курса, понятный маршрут и твой собственный темп." : view === "bookmarks" ? "Всё, к чему хочется вернуться. Важные определения, непростые доказательства и хорошие идеи." : "Затруднение — тоже точка роста. Вернись к сложному и попробуй ещё раз."}</p>
+          <p className="platform-lead">{view === "home" ? "Три курса, твой прогресс и материалы, к которым пора вернуться." : view === "bookmarks" ? "Всё, к чему хочется вернуться. Важные определения, непростые доказательства и хорошие идеи." : "Затруднение — тоже точка роста. Вернись к сложному и попробуй ещё раз."}</p>
           {view === "home" && <a href="#/search" className="study-home-search"><Search size={19} /><span>Найти определение, доказательство или задачу</span><kbd>Ctrl K</kbd></a>}
-          {view === "home" && <div className="platform-hero-tags"><span><BookOpen size={15} /> 3 курса</span><span><Layers3 size={15} /> {materials.length} материалов</span><span><Sparkles size={15} /> Учиться понимать</span></div>}
+          {view === "home" && <div className="platform-hero-tags"><span><BookOpen size={15} /> 3 курса</span><span><Layers3 size={15} /> {materials.length} материалов</span><span><ShieldCheck size={15} /> Данные на устройстве</span></div>}
         </div>
-        {view === "home" ? <div className="platform-intro-art"><LearningArt /><span className="platform-art-note">Из маленьких шагов<br /><b>складывается понимание.</b></span></div> : <div className="platform-view-symbol" aria-hidden="true">{view === "bookmarks" ? <BookmarkIcon /> : <NotebookPen />}</div>}
+        {view !== "home" && <div className="platform-view-symbol" aria-hidden="true">{view === "bookmarks" ? <BookmarkIcon /> : <NotebookPen />}</div>}
       </section>
       <nav className="platform-sections" aria-label="Разделы платформы"><a className={view === "home" ? "is-active" : ""} aria-current={view === "home" ? "page" : undefined} href="#/home"><Layers3 size={17} />Все курсы</a><a className={view === "bookmarks" ? "is-active" : ""} aria-current={view === "bookmarks" ? "page" : undefined} href="#/bookmarks"><BookmarkIcon size={17} />Закладки <span>{bookmarks.length}</span></a><a className={view === "mistakes" ? "is-active" : ""} aria-current={view === "mistakes" ? "page" : undefined} href="#/mistakes"><NotebookPen size={17} />Журнал <span>{journal.length}</span></a><a href="#/discrete/sync"><ShieldCheck size={17} />Аккаунт и синхронизация <ArrowUpRight size={14} /></a></nav>
       {snapshot.errors.length > 0 && <p role="alert">Не удалось прочитать: {snapshot.errors.join(", ")}. Исходные записи сохранены. Экспортируйте их со старого сайта перед восстановлением.</p>}
       {view === "home" && <>
-        <div className="platform-section-title"><div><span className="platform-overline">ОДИН ШАГ БЛИЖЕ К КОЛЛОКВИУМУ</span><h2>Твои курсы<span className="platform-title-dot">.</span></h2></div><span className="platform-section-caption">Выбирай, с чего начнём сегодня</span></div>
+        <div className="platform-section-title"><div><span className="platform-overline">ОБЗОР ПОДГОТОВКИ</span><h2>Твои курсы</h2></div><span className="platform-section-caption">Самооценка теории · отметки решённых задач</span></div>
         <div className="platform-courses">
-          <section className="platform-card platform-card-discrete"><div className="platform-course-art"><span className="platform-module">01 / МОДУЛЬ</span><LearningArt variant="discrete" /></div><div className="platform-card-body"><div className="platform-course-meta"><span>ЛОГИКА · СТРУКТУРЫ · ДОКАЗАТЕЛЬСТВА</span><ArrowUpRight size={20} /></div><h2>{courses.discrete.title}</h2><p className="platform-card-description">От логических связок до красивых комбинаторных идей.</p>
-            <div className="platform-card-stats"><div><strong>{discreteKnown} / 46</strong><span>Знаю вопросов</span></div><div><strong>{practiceKnown} / 145</strong><span>Могу доказать</span></div><div><strong>{planProgress(snapshot.plan.done).completed} / 84</strong><span>Пунктов плана</span></div></div>
-            <ProgressMeter value={discreteKnown} total={46} label="Освоение вопросов дискретной математики" />
-            <a className="platform-action" href="#/discrete/plan">Продолжить дискретную математику <ArrowRight size={18} /></a>
-            </div>
-          </section>
-          <section className="platform-card platform-card-calculus"><div className="platform-course-art"><span className="platform-module">02 / МОДУЛЬ</span><LearningArt variant="calculus" /></div><div className="platform-card-body"><div className="platform-course-meta"><span>ПРЕДЕЛЫ · РЯДЫ · НЕПРЕРЫВНОСТЬ</span><ArrowUpRight size={20} /></div><h2>{courses.calculus.title}</h2><p className="platform-card-description">Точные формулировки. Осмысленные доказательства.</p>
-            <div className="platform-card-stats"><div><strong>{calculusKnown} / {items.length}</strong><span>Знаю материалов</span></div><div><strong>{reviewDue}</strong><span>Пора повторить</span></div><div><strong>{snapshot.calculus.history.length}</strong><span>Билетов пройдено</span></div></div>
-            <ProgressMeter value={calculusKnown} total={items.length} label="Освоение материалов матанализа" />
-            <a className="platform-action" href="#/calculus/today">Продолжить матанализ <ArrowRight size={18} /></a>
-            </div>
-          </section>
-          <section className="platform-card platform-card-linear"><div className="platform-course-art"><span className="platform-module">02 / МОДУЛЬ</span><LearningArt variant="linear" /></div><div className="platform-card-body"><div className="platform-course-meta"><span>СИСТЕМЫ · МАТРИЦЫ · ОПРЕДЕЛИТЕЛИ</span><ArrowUpRight size={20} /></div><h2>{courses.linear.title}</h2><p className="platform-card-description">Оригинальные условия и подробный путь к ответу.</p>
-            <div className="platform-card-stats"><div><strong>188</strong><span>Номеров из сводки</span></div><div><strong>{linearDone} / 288</strong><span>Задач решено</span></div><div><strong>6</strong><span>Тематических блоков</span></div></div>
-            <ProgressMeter value={linearDone} total={288} label="Решённые задачи линейной алгебры" />
-            <a className="platform-action" href="#/linear/study">Продолжить линейную алгебру <ArrowRight size={18} /></a>
-            </div>
-          </section>
+          <CourseCard course="discrete" symbol="⋈" stats={[{ value: `${discreteKnown} / 46`, label: "Знаю вопросов" }, { value: `${practiceKnown} / 145`, label: "Могу доказать" }, { value: `${planProgress(snapshot.plan.done).completed} / 84`, label: "Пунктов плана" }]} value={discreteKnown} total={46} label="Самооценка «Знаю»" href="#/discrete/plan" action="Продолжить дискретную математику" />
+          <CourseCard course="calculus" symbol="∫" stats={[{ value: `${calculusKnown} / ${items.length}`, label: "Знаю материалов" }, { value: reviewDue, label: "Пора повторить" }, { value: snapshot.calculus.history.length, label: "Билетов пройдено" }]} value={calculusKnown} total={items.length} label="Самооценка «Знаю»" href="#/calculus/today" action="Продолжить матанализ" />
+          <CourseCard course="linear" symbol="⊞" stats={[{ value: 188, label: "Номеров из сводки" }, { value: `${linearDone} / 288`, label: "Задач решено" }, { value: 6, label: "Тематических блоков" }]} value={linearDone} total={288} label="Отмечено решёнными" href="#/linear/study" action="Продолжить линейную алгебру" />
         </div>
         <a className="study-home-recovery" href="#/recovery"><span className="study-home-recovery-icon"><Target /></span><span><b>Разобрать сложное</b><small>{pending.length ? `${pending.length} материалов из журнала ждут повторного ответа` : "Тренировка по затруднениям из завершённых билетов"}</small></span><ArrowUpRight size={23} /></a>
-        <div className="platform-next-steps"><div><span className="platform-overline">ХОРОШАЯ ПРИВЫЧКА</span><h2>Немного практики.<br /> Больше уверенности.</h2><p>Начни с понятного шага — остальное сложится.</p></div><a href="#/discrete/plan"><span className="platform-shortcut-icon"><Route /></span><span><b>Пройти по маршруту</b><small>План дискретной математики</small></span><ArrowUpRight /></a><a href="#/calculus/oral"><span className="platform-shortcut-icon"><BookOpen /></span><span><b>Ответить у доски</b><small>Устный экзаменатор матанализа</small></span><ArrowUpRight /></a></div>
-        <section className="platform-section platform-backup-section"><div className="platform-backup-heading"><span className="platform-backup-icon"><ShieldCheck size={26} /></span><div><span className="platform-overline">ПРОГРЕСС С ТОБОЙ</span><h2>Резервная копия всех курсов</h2></div></div><p>Сохрани оценки, билеты, тренировки, черновики, закладки и отметки решённых задач одним файлом. Можно загрузить и прежние копии обоих приложений.</p>
+        <div className="platform-next-steps"><div><span className="platform-overline">БЫСТРЫЙ ДОСТУП</span><h2>Проверка знаний</h2><p>План подготовки и устные ответы.</p></div><a href="#/discrete/plan"><span className="platform-shortcut-icon"><Route /></span><span><b>Пройти по маршруту</b><small>План дискретной математики</small></span><ArrowUpRight /></a><a href="#/calculus/oral"><span className="platform-shortcut-icon"><BookOpen /></span><span><b>Ответить у доски</b><small>Устный экзаменатор матанализа</small></span><ArrowUpRight /></a></div>
+        <section id="backup" className="platform-section platform-backup-section"><div className="platform-backup-heading"><span className="platform-backup-icon"><ShieldCheck size={26} /></span><div><span className="platform-overline">ПРОГРЕСС С ТОБОЙ</span><h2>Резервная копия всех курсов</h2></div></div><p>Сохрани оценки, билеты, тренировки, черновики, закладки и отметки решённых задач одним файлом. Можно загрузить и прежние копии обоих приложений.</p>
           <div className="platform-backup"><button onClick={() => {
             try {
               const blob = new Blob([JSON.stringify(exportBackup(), null, 2)], { type: "application/json" });

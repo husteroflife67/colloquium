@@ -4,7 +4,7 @@ import { sample } from "../src/model";
 test("материалы, поиск, ответы и сохранение прогресса", async ({ page }) => {
   await page.goto("/#/discrete/course");
   await expect(
-    page.getByRole("heading", { name: "Большие знания. Маленькие шаги." }),
+    page.getByRole("heading", { name: "Дискретная математика", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".question-row")).toHaveCount(46);
   await page.getByLabel("Поиск по вопросам").fill("Контрапозиция");
@@ -112,7 +112,7 @@ test("мобильный интерфейс и первоисточники", as
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/#/discrete/course");
   await expect(
-    page.getByRole("heading", { name: "Большие знания. Маленькие шаги." }),
+    page.getByRole("heading", { name: "Дискретная математика", exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(

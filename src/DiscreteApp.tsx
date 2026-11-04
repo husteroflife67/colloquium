@@ -1,4 +1,6 @@
-import { LearningArt } from "./platform/LearningArt";
+import { CourseOverview } from "./platform/CourseOverview";
+import { lastMaterial } from "./platform/workspace-preferences";
+import { rememberMaterial } from "./platform/workspace-preferences";
 import React, { useState, useEffect } from "react";
 
 import {
@@ -41,7 +43,7 @@ import { PreparationPlan } from "./PreparationPlan";
 import type { PlanTarget } from "./plan-model";
 import "katex/dist/katex.min.css";
 import courseStyle from "./style.css?inline";
-import { CourseTools, useCoursePage, Bookmark } from "./platform/course-tools";
+import { ResumeMaterial, CourseTools, useCoursePage, Bookmark } from "./platform/course-tools";
 import course from "./data/course.json";
 import {
   emptySaved,
@@ -89,9 +91,9 @@ export default function DiscreteApp() {
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Question | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const [mobile, setMobile] = useState(false);
   const [topics, setTopics] = useState(course.topics.map((t) => t.id));
   const [count, setCount] = useState(6);
+  const [activeTicketQuestion, setActiveTicketQuestion] = useState(0);
   const [ticket, setTicket] = useState<Question[]>([]);
   const [finished, setFinished] = useState(false);
   const [ratings, setRatings] = useState<Record<string, Rating>>({});
@@ -137,11 +139,16 @@ export default function DiscreteApp() {
     setSelected(null);
     setSearch("");
     setFilter("all");
-    setMobile(false);
     setHistory(null);
     window.scrollTo(0, 0);
   }
+  useEffect(() => {
+    const update = (event: Event) => { const detail = (event as CustomEvent<{ course: string; route: string }>).detail; if (detail.course === "discrete") navigate(detail.route as Page); };
+    window.addEventListener("workspace-navigate", update);
+    return () => window.removeEventListener("workspace-navigate", update);
+  });
   function open(q: Question) {
+    rememberMaterial(`#/discrete/course?item=${encodeURIComponent(q.id)}`);
     setSelected(q);
     setRevealed(false);
     window.scrollTo(0, 0);
@@ -184,6 +191,7 @@ export default function DiscreteApp() {
         .includes(search.toLocaleLowerCase("ru")),
   );
   function generate() {
+    setActiveTicketQuestion(0);
     try {
       setTicket(
         sample(
@@ -282,91 +290,10 @@ export default function DiscreteApp() {
     <div className="app">
       <style>{courseStyle}</style>
       <CourseTools course="discrete" />
-      <button
-        className="mobile-toggle"
-        aria-label="Открыть меню"
-        onClick={() => setMobile(!mobile)}
-      >
-        {mobile ? <X /> : <Menu />}
-      </button>
-      <aside className={`sidebar ${mobile ? "is-open" : ""}`}>
-        <a
-          href="#"
-          className="brand"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("course");
-            setTopic("all");
-          }}
-        >
-          <span className="brand-icon">
-            <Braces size={25} />
-          </span>
-          дискретно<span className="brand-dot">.</span>
-        </a>
-        <div className="workspace-label">ТВОЁ УЧЕБНОЕ ПРОСТРАНСТВО</div>
-        <nav>
-          {(
-            [
-              { id: "course", icon: LayoutGrid, name: "Темы и вопросы" },
-              { id: "review", icon: RotateCcw, name: "Повторение" },
-              { id: "plan", icon: Route, name: "План подготовки" },
-              { id: "proofs", icon: GraduationCap, name: "Доказательства" },
-              { id: "ticket", icon: Ticket, name: "Пробный билет" },
-              {
-                id: "progress",
-                icon: ChartNoAxesCombined,
-                name: "Мой прогресс",
-              },
-              { id: "sync", icon: Cloud, name: "Синхронизация" },
-            ] as const
-          ).map((n) => (
-            <button
-              key={n.id}
-              className={page === n.id ? "active" : ""}
-              onClick={() => navigate(n.id)}
-            >
-              <n.icon size={19} />
-              {n.name}
-              {n.id === "review" && review.length > 0 && (
-                <span className="nav-count">{review.length}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-course">
-          <span className="eyebrow">ТЕКУЩИЙ КУРС</span>
-          <div className="course-icon">
-            <BookOpen size={20} />
-          </div>
-          <strong>
-            Дискретная
-            <br />
-            математика
-          </strong>
-          <span>Коллоквиум № 1</span>
-          <div className="sidebar-progress">
-            <i style={{ width: `${(known / total) * 100}%` }} />
-          </div>
-          <small>
-            {known} из {total} вопросов изучено
-          </small>
-        </div>
-        <div className="sidebar-bottom">
-          <span className="avatar">Σ</span>
-          <div>
-            <strong>В своём темпе</strong>
-            <small>Шаг за шагом к пониманию</small>
-          </div>
-        </div>
-      </aside>
+
+
       <main>
-        <header className="topbar">
-          <div>
-            ПМИ ФКН ВШЭ <span>/</span> Подготовка к коллоквиуму
-          </div>
-          <SyncBadge onOpen={() => navigate("sync")} />
-        </header>
+
         <div className="content">
           {warning && (
             <div role="alert" className="notice">
@@ -504,154 +431,18 @@ export default function DiscreteApp() {
             </>
           ) : page === "course" || page === "review" ? (
             <>
-              <div className="page-kicker">
-                ДИСКРЕТНАЯ МАТЕМАТИКА · КОЛЛОКВИУМ № 1
-              </div>
-              <div className="heading-row">
-                <div>
-                  <h1>
-                    {page === "review"
-                      ? "Время повторить"
-                      : "Большие знания. Маленькие шаги."}
-                  </h1>
-                  <p className="subtitle">
-                    {page === "review"
-                      ? "Здесь вопросы, к которым стоит вернуться. Вспомните ответ, прежде чем открыть подсказку."
-                      : "Разбирайтесь в теории, проверяйте себя и приходите на коллоквиум уверенно."}
-                  </p>
-                </div>
-                <span className="year-tag">2026 / 27</span>
-              </div>
-              {page === "course" && (
-                <>
-                  <section className="hero">
-                    <div className="hero-copy">
-                      <span className="hero-label">
-                        <span /> ОТ ТЕОРИИ К УВЕРЕННОМУ ОТВЕТУ
-                      </span>
-                      <h2>
-                        Понять. Вспомнить.
-                        <br />
-                        <em>Рассказать своими словами.</em>
-                      </h2>
-                      <p>
-                        {total} вопросов, {course.topics.length} тем и один
-                        понятный маршрут.
-                        <br />
-                        Начните с темы или испытайте себя в пробном билете.
-                      </p>
-                      <button onClick={() => navigate("ticket")}>
-                        Собрать пробный билет <ArrowUpRight size={18} />
-                      </button>
-                    </div>
-                    <div className="math-art course-illustration" aria-hidden="true">
-                      <LearningArt variant="discrete" />
-                      <span className="art-formula">|A ∪ B| = |A| + |B| − |A ∩ B|</span>
-                    </div>
-                  </section>
-                  <section className="stats-row">
-                    <div>
-                      <span className="stat-icon green">
-                        <CheckCheck size={21} />
-                      </span>
-                      <div>
-                        <strong>
-                          {known}
-                          <small> / {total}</small>
-                        </strong>
-                        <span>Уверенно знаю</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="stat-icon amber">
-                        <BookOpen size={21} />
-                      </span>
-                      <div>
-                        <strong>{learning}</strong>
-                        <span>Сейчас изучаю</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="stat-icon coral">
-                        <RotateCcw size={21} />
-                      </span>
-                      <div>
-                        <strong>{review.length}</strong>
-                        <span>Нужно повторить</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="stat-icon violet">
-                        <Ticket size={21} />
-                      </span>
-                      <div>
-                        <strong>{saved.results.length}</strong>
-                        <span>Билетов пройдено</span>
-                      </div>
-                    </div>
-                  </section>
-                  <div className="section-title">
-                    <h2>
-                      Карта курса <span>{course.topics.length} тем</span>
-                    </h2>
-                    <button
-                      className="text-button"
-                      onClick={() => {
-                        setTopic("all");
-                        document
-                          .getElementById("questions")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      }}
-                    >
-                      Все вопросы <ArrowRight size={16} />
-                    </button>
-                  </div>
-                  <div className="topics-grid">
-                    {course.topics.map((t, i) => {
-                      const qs = course.questions.filter(
-                        (q) => q.topicId === t.id,
-                      );
-                      const k = qs.filter(
-                        (q) => entry(q.id).status === "known",
-                      ).length;
-                      const Icon = icons[i % icons.length];
-                      return (
-                        <button
-                          key={t.id}
-                          className={`topic-card tone-${i} ${topic === t.id ? "selected" : ""}`}
-                          onClick={() => {
-                            setTopic(topic === t.id ? "all" : t.id);
-                            setFilter("all");
-                            document
-                              .getElementById("questions")
-                              ?.scrollIntoView({ behavior: "smooth" });
-                          }}
-                        >
-                          <div className="topic-top">
-                            <span className="topic-icon">
-                              <Icon size={23} />
-                            </span>
-                            <span className="topic-num">
-                              {t.label} <ArrowUpRight size={17} />
-                            </span>
-                          </div>
-                          <h3>{t.title}</h3>
-                          <p>{t.description}</p>
-                          <div className="topic-progress">
-                            <i style={{ width: `${(k / qs.length) * 100}%` }} />
-                          </div>
-                          <div className="topic-meta">
-                            <span>{qs.length} вопросов</span>
-                            <span>
-                              {k} из {qs.length} изучено
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+              {page === "review" ? <><div className="page-kicker">ДИСКРЕТНАЯ МАТЕМАТИКА · ПОВТОРЕНИЕ</div><h1>Время повторить</h1><p className="subtitle">Вспомните ответ, прежде чем открыть подсказку.</p></> : <CourseOverview title="Дискретная математика" context="Коллоквиум I · твоя подготовка" symbol="⋈" value={known} total={total} progressLabel="Самооценка «Знаю»"
+                metrics={[
+                  { label: "Знаю вопросов", value: `${known} / ${total}`, icon: BookOpen, action: () => document.getElementById("questions")?.scrollIntoView() },
+                  { label: "К повторению", value: review.length, icon: RotateCcw, action: () => navigate("review") },
+                  { label: "Пробных билетов", value: saved.results.length, icon: Ticket, action: () => navigate("progress") },
+                  { label: "Сейчас изучаю", value: learning, icon: GraduationCap, action: () => { setFilter("learning"); document.getElementById("questions")?.scrollIntoView(); } },
+                ]}
+                today={[{ title: "Повторить вопросы", subtitle: `${review.length} вопросов в списке повторения`, icon: RotateCcw, action: () => navigate("review") }, { title: "Пройти пробный билет", subtitle: "Формулировки и доказательства", action: () => navigate("ticket") }]}
+                next={{ title: "Продолжить обучение", subtitle: lastMaterial("discrete")?.title ?? (course.questions.find(q => entry(q.id).status !== "known") ?? course.questions[0]).title, action: () => { const last = lastMaterial("discrete"); open(course.questions.find(q => q.id === last?.id) ?? course.questions.find(q => entry(q.id).status !== "known") ?? course.questions[0]); } }}
+                topics={course.topics.map(t => { const qs = course.questions.filter(q => q.topicId === t.id); return { title: t.title, total: qs.length, value: qs.filter(q => entry(q.id).status === "known").length, action: () => { setTopic(t.id); setFilter("all"); document.getElementById("questions")?.scrollIntoView(); } }; })} onTopics={() => { setTopic("all"); document.getElementById("questions")?.scrollIntoView(); }}>
+                <button onClick={() => navigate("plan")}>План подготовки</button><button onClick={() => navigate("proofs")}>Задачи и доказательства</button><a href={assetUrl("/materials/colloq-base26f.pdf")} target="_blank" rel="noreferrer">Программа курса ↗</a>
+              </CourseOverview>}
               {page === "review" && (
                 <div className="notice neutral">
                   Повторение теории показано ниже. Задачи и доказательства имеют
@@ -900,13 +691,14 @@ export default function DiscreteApp() {
                       сохранённая самооценка
                     </p>
                   )}
+                  <nav className="exam-question-jump" aria-label="Вопросы текущего билета">{(history ? history.questionIds : ticket.map(q => q.id)).map((id,index) => <button key={id} aria-current={activeTicketQuestion === index ? "step" : undefined} onClick={() => { setActiveTicketQuestion(index); document.getElementById(`discrete-ticket-${id}`)?.scrollIntoView({ block: "start" }); }}>{index + 1}</button>)}</nav>
                   {(history
                     ? history.questionIds
                         .map((id) => course.questions.find((q) => q.id === id))
                         .filter((q): q is Question => !!q)
                     : ticket
                   ).map((q, i) => (
-                    <article key={q.id} className="ticket-question">
+                    <article key={q.id} id={`discrete-ticket-${q.id}`} className="ticket-question">
                       <span className="eyebrow">
                         ВОПРОС {i + 1} · ПУНКТ ПРОГРАММЫ {q.number}
                       </span>
@@ -1114,7 +906,7 @@ export default function DiscreteApp() {
           )}
           <footer>
             <span>
-              <Braces size={16} /> дискретно <span>· Учиться понимать</span>
+              <Braces size={16} /> Коллоквиум <span>· Учиться понимать</span>
             </span>
             <a
               href={assetUrl("/materials/DMlec-base.pdf")}

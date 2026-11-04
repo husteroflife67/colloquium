@@ -22,8 +22,8 @@ export function MaterialActions({ material, questionId }: { material: Material; 
     catch { setNotice("Автоматическое копирование недоступно. Выделите текст в поле и скопируйте вручную."); }
   }
   return <span className="study-material-actions">
-    <button type="button" onClick={e => open("share", e.currentTarget)}><Share2 size={14} />Поделиться карточкой</button>
-    <button type="button" onClick={e => open("report", e.currentTarget)}><Flag size={14} />Сообщить о неточности</button>
+    <button type="button" title="Поделиться карточкой" onClick={e => open("share", e.currentTarget)}><Share2 size={16} /><span className="material-action-label">Поделиться карточкой</span></button>
+    <button type="button" title="Сообщить о неточности" onClick={e => open("report", e.currentTarget)}><Flag size={16} /><span className="material-action-label">Сообщить о неточности</span></button>
     {mode && createPortal(<dialog ref={dialog} className="study-dialog" aria-labelledby="study-dialog-title" onCancel={e => { e.preventDefault(); close(); }} onClick={e => { if (e.target === e.currentTarget) { const r = e.currentTarget.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close(); } }}>
       <div className="study-dialog-heading"><span className="study-dialog-icon">{mode === "share" ? <Share2 /> : <Flag />}</span><button type="button" aria-label="Закрыть окно" onClick={close}><X size={20} /></button></div>
       <h2 id="study-dialog-title">{mode === "share" ? "Обсудить — значит понять" : "Поможем ответу стать точнее"}</h2><p className="study-dialog-material">{feedbackContext(material, questionId).title}</p>

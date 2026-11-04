@@ -24,8 +24,8 @@ test("reduced motion stops decorative and interface animations, and the font is 
   page.on("request", request => { if (request.resourceType() === "font") fonts.push(request.url()); });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await expect(page.locator(".art-float").first()).toBeVisible();
-  expect(await page.locator(".art-float").first().evaluate(el => getComputedStyle(el).animationName)).toBe("none");
+  await expect(page.locator(".workspace-nav")).toBeVisible();
+  expect(await page.locator(".workspace-nav").evaluate(el => getComputedStyle(el).animationName)).toBe("none");
   expect(await page.locator(".platform-card").first().evaluate(el => getComputedStyle(el).animationName)).toBe("none");
   await page.evaluate(() => document.fonts.ready);
   expect(fonts.some(url => url.includes("onest-cyrillic"))).toBe(true);

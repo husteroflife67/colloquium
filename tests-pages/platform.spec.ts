@@ -23,7 +23,7 @@ test("production search and feedback keep the deployment prefix and review route
   await page.getByRole("button", { name: "Поделиться карточкой", exact: true }).click();
   await expect(page.getByLabel("Ссылка на карточку")).toHaveValue(new RegExp(`${baseURL!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}#/discrete/course\\?item=`));
   await page.keyboard.press("Escape");
-  await page.getByRole("link", { name: "Журнал", exact: true }).click();
+  await page.getByRole("link", { name: "Журнал ошибок", exact: true }).click();
   await page.getByRole("link", { name: "Разобрать сложное", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Разобрать сложное." })).toBeVisible();
 });

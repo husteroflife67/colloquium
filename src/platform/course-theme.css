@@ -1,35 +1,101 @@
-/* All course shells consume the same tokens, including the existing dark theme. */
+/* Shared course presentation, preserving every course's learning flow. */
 .platform-course {
-  --bg:var(--ds-bg); --panel:var(--ds-surface); --text:var(--ds-ink); --muted:var(--ds-muted);
-  --line:var(--ds-line); --border:var(--ds-line); --accent:var(--ds-accent); --green:var(--ds-accent);
-  --tint:var(--ds-soft); --sidebar:var(--ds-surface);
-  font-family:var(--platform-font); background:var(--bg); color:var(--text);
+ --bg:var(--ds-bg); --panel:var(--ds-surface); --text:var(--ds-ink); --muted:var(--ds-muted); --line:var(--ds-line); --border:var(--ds-line); --accent:var(--ds-accent); --green:var(--ds-accent); --tint:var(--ds-accent-soft); --sidebar:var(--ds-surface);
+ font:15px/1.6 var(--platform-font); color:var(--ds-ink); background:var(--ds-bg);
 }
-.platform-course :is(.sidebar,.topbar) { background:var(--panel); color:var(--muted); border-color:var(--line); }
-.platform-course :is(.brand,.brand-sub,.sidebar-course strong,.sidebar-course small,.sidebar-bottom strong,.sidebar-bottom small,.course b,.course span,.theme-toggle,.workspace-label,.eyebrow,.page-kicker) { color:var(--muted); }
-.platform-course :is(.brand-symbol,.mobile-toggle) { background:var(--accent); color:var(--ds-on-accent); border-radius:4px; }
-.platform-course .sidebar nav button { color:var(--muted); border-radius:4px; font-size:13px; padding:12px; transition:background .15s,color .15s; }
-.platform-course .sidebar nav button:hover { color:var(--text); background:var(--tint); }
-.platform-course .sidebar nav button.active { background:var(--accent); color:var(--ds-on-accent); }
-.platform-course .sidebar nav button svg { color:inherit; }
-.platform-course :is(h1,h2,h3) { font-family:var(--platform-font); color:var(--text); }
-.platform-course h1 { font-weight:600; letter-spacing:-1.2px; }
-.platform-course :is(.subtitle,.page-heading p,.hero p,.hero-note) { color:var(--muted); }
-.platform-course .hero { background:var(--tint); border:1px solid var(--line); border-radius:6px; }
-.platform-course .hero h2,.platform-course .hero h2 em { color:var(--text); font-family:var(--platform-font); font-weight:600; }
-.platform-course :is(.primary,.hero button) { color:var(--ds-on-accent); background:var(--accent); border:1px solid var(--accent); border-radius:4px; }
-.platform-course :is(.primary,.hero button):hover:not(:disabled) { filter:brightness(.93); }
-.platform-course :is(.panel,.library-card,.topic-card,.detail-card,.question-list,.topic-list,.stat,.stats-row,.progress-overview,.reading) { background:var(--panel); border-color:var(--line); border-radius:6px; box-shadow:none; }
-.platform-course :is(.topic-card,.library-card):hover { border-color:var(--accent); background:var(--panel); transform:none; box-shadow:0 2px 0 var(--line); }
-.platform-course .topic-card.selected { border-color:var(--accent); background:var(--tint); }
-.platform-course :is(.question-number,.statement,.hint,.idea,.answer,.official-prompt) { border-radius:4px; background:var(--tint); color:var(--text); border-color:var(--line); }
-.platform-course :is(.topic-number,.stat strong,.text-button,.source-link,.topic-links button,.reading-toc a,.reading h3) { color:var(--accent); }
-.platform-course :is(.secondary,.secondary-button,.platform-bookmark button) { border-radius:4px; border-color:var(--line); color:var(--text); background:var(--panel); }
-.platform-course :is(input,select,textarea) { border-radius:4px; border-color:var(--line); accent-color:var(--accent); }
-.platform-course :is(.sidebar-progress,.track) { background:var(--tint); border-radius:0; }
-.platform-course :is(.sidebar-progress,.track) i { background:var(--accent); }
-.platform-course footer,.platform-course footer a { color:var(--muted); border-color:var(--line); }
-.platform-course .course-illustration { transform:none; background-image:none; color:var(--accent); }
-.platform-course .course-illustration .learning-art { height:auto; max-width:440px; }
-.platform-course .math-art.course-illustration { width:38%; right:12px; }
-.platform-course .course-illustration :is(.art-formula,.art-caption) { color:var(--muted); font-size:12px; }
+.platform-course :is(.panel,.library-card,.topic-card,.detail-card,.question-list,.topic-list,.stat,.stats-row,.progress-overview,.reading,.exam-card,.ticket,.ticket-question,.practice-card,.plan-stage,.result-card,.linear-task,.linear-topic-card,.linear-source,.linear-exam-task,.linear-exam-setup,.linear-theory,.linear-method) { background:var(--ds-surface); border:1px solid var(--ds-line); border-radius:12px; box-shadow:none; color:var(--ds-ink); }
+.platform-course :is(.topic-card,.library-card,.linear-topic-card):hover { border-color:var(--ds-accent); background:var(--ds-surface); box-shadow:0 2px 8px #17192306; transform:none; }
+.platform-course :is(.topic-card.selected,.library-card.selected) { background:var(--ds-accent-soft); border-color:var(--ds-accent); }
+.platform-course :is(.primary,.hero button,.linear-exam-primary) { color:var(--ds-on-accent); background:var(--ds-accent); border:1px solid var(--ds-accent); border-radius:8px; min-height:42px; padding:10px 16px; font-size:14px; }
+.platform-course :is(.primary,.hero button,.linear-exam-primary):hover:not(:disabled) { background:var(--ds-accent-hover); filter:none; }
+.platform-course :is(.secondary,.secondary-button,.linear-page button,.linear-dialog button) { color:var(--ds-ink); background:var(--ds-surface); border:1px solid var(--ds-line); border-radius:8px; min-height:40px; font-size:13px; }
+.platform-course :is(.secondary,.secondary-button,.linear-page button):hover:not(:disabled) { background:var(--ds-soft); border-color:var(--ds-accent); }
+.platform-course :is(.text-button,.source-link,.topic-links button,.reading-toc a,.linear-back,.linear-footer a,.linear-math h4) { color:var(--ds-accent); font-size:13px; }
+.platform-course :is(.subtitle,.page-heading p,.linear-help,.linear-task-title,.linear-heading p,.linear-topic-card p,.linear-exam-heading p,.linear-exam-rules,.linear-exam-draft,.linear-footer,.linear-source small) { color:var(--ds-muted); }
+.platform-course :is(.stats,.stats-row,.linear-stats) { gap:12px; margin:20px 0; }
+.platform-course .stats-row { padding:20px; }
+.platform-course :is(.stat,.linear-stats>div) { padding:20px; border-radius:10px; background:var(--ds-surface); border:1px solid var(--ds-line); }
+.platform-course .stat strong { font:700 28px/1.2 var(--platform-font); color:var(--ds-ink); }
+.platform-course :is(.stat small,.stat span,.stats-row span,.linear-stats span) { font-size:12px; color:var(--ds-muted); }
+.platform-course :is(.stat>svg,.stat-icon,.topic-number,.topic-icon,.question-number) { color:var(--ds-accent); background:var(--ds-accent-soft); border-radius:8px; }
+.platform-course :is(.ratings,.rating-buttons,.segmented,.tabs,.linear-tabs) { gap:6px; flex-wrap:wrap; background:var(--ds-soft); border-radius:8px; padding:4px; }
+.platform-course :is(.ratings button,.rating,.segmented button,.tabs button) { border-radius:6px; font-size:13px; min-height:38px; color:var(--ds-muted); padding:9px 12px; }
+.platform-course :is(.ratings button.active,.rating.chosen,.segmented button.active,.tabs button.active,.linear-tabs button.active,.linear-topics button.active) { color:var(--ds-accent); background:var(--ds-accent-soft); border:1px solid var(--ds-line); box-shadow:none; }
+.platform-course input,.platform-course select,.platform-course textarea { background:var(--ds-surface); color:var(--ds-ink); border-color:var(--ds-line); accent-color:var(--ds-accent); border-radius:8px; font-size:14px; }
+.platform-course textarea { line-height:1.75; padding:16px; }
+.platform-course :is(input,textarea)::placeholder { color:var(--ds-muted); opacity:1; }
+.platform-course :is(.reading,.detail-card,.linear-theory) { max-width:900px; padding:28px; }
+.platform-course :is(.reading p,.reading li,.answer p,.proof li,.linear-math,.rich-text) { font-size:16px; line-height:1.85; color:var(--ds-ink); }
+.platform-course :is(.statement,.official-prompt,.recovery-prompt) { background:var(--ds-accent-soft); border:1px solid color-mix(in srgb,var(--ds-accent) 20%,var(--ds-line)); border-radius:10px; padding:20px; color:var(--ds-ink); }
+.platform-course :is(.hint,.idea,.example,.linear-note,.linear-math .note) { background:var(--ds-soft); border-color:var(--ds-line); color:var(--ds-ink); border-radius:8px; }
+.platform-course .answer { background:var(--ds-surface); color:var(--ds-ink); border-color:var(--ds-line); border-radius:10px; }
+.platform-course .proof { border-top:1px solid var(--ds-line); padding-top:24px; margin-top:24px; }
+.platform-course :is(.reading-toc,.info-strip) { background:var(--ds-soft); color:var(--ds-muted); border:1px solid var(--ds-line); border-radius:8px; font-size:13px; }
+.platform-course :is(.library-card h3,.topic-card h3) { font-size:17px; }
+.platform-course :is(.reading h3,.linear-math h3) { font-size:20px; margin-top:28px; }
+.platform-course :is(.reading h2,.question-heading) { line-height:1.4; }
+.platform-course :is(.question-actions,.question-tools,.study-card-tools,.sim-controls,.settings-actions,.linear-task-head) { flex-wrap:wrap; gap:8px; }
+.platform-course :is(.sim-toolbar,.ticket-toolbar,.linear-exam-status) { background:var(--ds-surface); color:var(--ds-ink); border:1px solid var(--ds-line); border-radius:10px; padding:20px; box-shadow:none; }
+.platform-course :is(.timer,.linear-exam-clock>span) { font-variant-numeric:tabular-nums; color:var(--ds-accent); }
+.platform-course :is(.sim-content,.sim-item,.linear-exam-task) { min-width:0; }
+.platform-course :is(.total-score,.linear-exam-summary) { background:var(--ds-accent-soft); color:var(--ds-ink); border-color:var(--ds-line); border-radius:10px; }
+.platform-course :is(.history-row,.history-card,.linear-exam-history,.linear-exam-review) { border-color:var(--ds-line); }
+.platform-course .notice { background:var(--ds-soft); color:var(--ds-ink); border:1px solid var(--ds-line); border-radius:8px; }
+.platform-course :is(.danger,.error) { color:var(--ds-danger); background:var(--ds-danger-bg); border-color:var(--ds-danger); }
+.platform-course :is(.linear-task-done) { border-left:3px solid var(--ds-success); }
+.platform-course :is(.linear-difficulty-easy) { color:var(--ds-success); background:var(--ds-success-bg); border-color:var(--ds-line); }
+.platform-course :is(.linear-difficulty-medium) { color:var(--ds-warning); background:var(--ds-warning-bg); border-color:var(--ds-line); }
+.platform-course :is(.linear-difficulty-hard) { color:var(--ds-danger); background:var(--ds-danger-bg); border-color:var(--ds-line); }
+.platform-course .linear-heading { border:0; border-radius:0; background:transparent; padding:0; margin:12px 0 24px; }
+.platform-course .linear-heading-art { width:64px; height:64px; min-width:64px; border-radius:14px; background:var(--ds-accent-soft); border:0; color:var(--ds-accent); transform:none; }
+.platform-course .linear-heading-art svg { width:36px; height:36px; }
+.platform-course .linear-heading-art i { display:none; }
+.platform-course .linear-heading h1 { font-size:32px; }
+.platform-course .linear-heading h1 span { color:var(--ds-ink); }
+.platform-course .linear-topics { padding:8px; background:var(--ds-soft); border-radius:10px; }
+.platform-course .linear-toolbar { background:var(--ds-bg); top:68px; border-color:var(--ds-line); }
+.platform-course .linear-topic-card>div { color:var(--ds-muted); }
+.platform-course .linear-exam-invite { color:var(--ds-on-accent); background:var(--ds-accent); border-radius:10px; border:0; box-shadow:none; }
+.platform-course .linear-exam-invite:hover { transform:none; box-shadow:none; background:var(--ds-accent-hover); }
+.platform-course .linear-solution { border-color:var(--ds-line); }
+.platform-course .linear-level-group[data-difficulty]>.linear-level-heading { background:var(--ds-soft); color:var(--ds-ink); border:1px solid var(--ds-line); border-radius:10px; box-shadow:none; }
+.platform-course .linear-level-heading :is(p,span) { color:var(--ds-muted); }
+.platform-course .linear-math th { background:var(--ds-soft); }
+.platform-course .linear-math :is(th,td) { border-color:var(--ds-line); }
+.platform-course .linear-page progress { border-radius:6px; background:var(--ds-soft); }
+.platform-course .linear-page progress::-webkit-progress-bar { background:var(--ds-soft); }
+.platform-course .linear-page progress::-webkit-progress-value { background:var(--ds-accent); }
+.platform-course footer { border-color:var(--ds-line); }
+.platform-course .linear-dialog,.study-dialog { background:var(--ds-surface); color:var(--ds-ink); border-color:var(--ds-line); border-radius:12px; --study-text:var(--ds-ink); --study-muted:var(--ds-muted); --study-border:var(--ds-line); --study-input:var(--ds-bg); }
+.platform-course .linear-dialog-head { border-color:var(--ds-line); }
+/* Formula overflow stays inside each formula, never the page. */
+.platform-course :is(main,section,article,.panel,.reading,.detail-card,.linear-math,.question,.proof,.answer),.platform-page section { min-width:0; overflow-wrap:anywhere; }
+:is(.platform-course,.platform-page,.command-panel) .formula { display:inline-block; vertical-align:middle; max-width:100%; overflow-x:auto; overflow-y:hidden; padding-block:3px; }
+:is(.platform-course,.platform-page) .katex-display { max-width:100%; overflow-x:auto; overflow-y:hidden; padding:8px 2px; }
+.platform-course .katex { font-size:1.1em; }
+.platform-course :is(.reading,.answer,.linear-math) table { display:block; max-width:100%; overflow-x:auto; }
+.platform-course :is(img,svg) { max-width:100%; }
+@media(max-width:767px) {
+ .platform-course :is(.reading,.detail-card,.linear-theory) { padding:20px 16px; }
+ .platform-course :is(.reading p,.reading li,.answer p,.proof li,.linear-math) { font-size:15px; }
+ .platform-course :is(.statement,.official-prompt) { padding:16px; }
+ .platform-course .linear-heading h1 { font-size:28px; }
+ .platform-course .linear-toolbar { top:108px; }
+ .platform-course :is(.stats,.stats-row,.linear-stats) { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .platform-course .linear-stats>div:last-child { grid-column:1/-1; }
+ .platform-course .linear-search,.platform-course .linear-difficulty-filter { min-width:0; max-width:100%; }
+ .platform-course :is(.linear-page button,.primary,.secondary,.rating,.ratings button) { min-height:44px; }
+}
+@media print { .workspace-nav,.platform-bar,.workspace-skip { display:none; } .platform-course,.platform-page { padding-top:0; } .platform-course .app>main,.platform-course .main-shell,.platform-course .linear-page { margin-left:0; } }
+.platform-course .workspace-resume { display:flex; align-items:center; gap:12px; background:var(--ds-surface); border:1px solid var(--ds-line); border-radius:10px; padding:16px 20px; margin:16px 0; color:var(--ds-accent); }
+.workspace-resume>span:nth-child(2) { flex:1; min-width:0; }
+.workspace-resume small { display:block; font-size:12px; color:var(--ds-muted); margin-bottom:4px; }
+.workspace-resume strong { font-size:14px; font-weight:500; }
+html[data-density=compact] .platform-course :is(.panel,.reading,.detail-card,.linear-task-head) { padding:16px; }
+html[data-density=compact] .platform-course :is(.library-card,.topic-card) { padding:16px; }
+html[data-density=compact] .platform-course :is(.question-row,.topic-list>button) { padding-block:12px; }
+html[data-density=compact] .platform-course .linear-task { margin-block:12px; }
+
+.platform-course :is(h1,h2,h3,h4) { font-family:var(--platform-font); }
+.platform-course :is(.reading,.linear-task,.linear-exam-task,.detail-card) { scroll-margin-top:92px; }
+@media(max-width:767px) { .platform-course :is(.reading,.linear-task,.linear-exam-task,.detail-card) { scroll-margin-top:128px; } }

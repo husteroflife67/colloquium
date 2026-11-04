@@ -6,3 +6,6 @@ playwright-report/
 .env
 .env.*
 !.env.example
+
+# Local redesign audit screenshots, scripts, and test logs.
+/work/
