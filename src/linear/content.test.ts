@@ -26,6 +26,12 @@ describe('linear algebra workbook', () => {
     expect(materialLink(m)).toBe('#/linear/study?item=%D0%9F178');
     expect(searchAll('перестановка', 'linear').some(d => d.material.course === 'linear')).toBe(true);
   });
+  it('keeps the compatible singular equation P870 as a three-parameter family', () => {
+    expect(linearSolutions['П870']).toContain('3R₁−2R₂');
+    expect(linearSolutions['П870']).toContain('три независимых параметра');
+    expect(linearSolutions['П870']).toContain('AX-B=');
+    expect(linearSolutions['П870']).not.toContain('Решений нет');
+  });
   it('rejects malformed or unknown progress before any storage mutation', () => {
     expect(validateLinear({ version: 1, done: { 'П82': true, 'П83': false } }).done['П82']).toBe(true);
     for (const data of [{ version: 1, done: { missing: true } }, { version: 1, done: { 'П82': 'yes' } }, { version: 1, done: [] }, {}]) expect(() => validateLinear(data)).toThrow();

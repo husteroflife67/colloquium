@@ -90,3 +90,12 @@ test('exact number filter and printing do not mark a task as solved', async ({ p
   await page.getByLabel('Осталось', { exact: true }).check();
   await expect(page.locator('.linear-task')).toHaveCount(0);
 });
+
+test('P870 shows a compatible singular matrix equation with three free parameters', async ({ page }) => {
+  await page.goto('/#/linear/study?item=%D0%9F870');
+  await page.getByRole('button', { name: 'Показать решение', exact: true }).click();
+  const solution = page.locator('.linear-solution');
+  await expect(solution).toContainText('три независимых параметра');
+  await expect(solution).not.toContainText('Решений нет');
+  await expect(solution.locator('.katex-error')).toHaveCount(0);
+});
