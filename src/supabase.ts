@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { projectUrl } from "./supabase-url";
 const url = import.meta.env.VITE_SUPABASE_URL?.trim();
 const key = (
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
@@ -8,17 +9,7 @@ let configurationError = "";
 function configuredClient() {
   if (!url || !key) return null;
   try {
-    const parsed = new URL(url);
-    if (
-      parsed.protocol !== "https:" &&
-      !(
-        parsed.protocol === "http:" &&
-        ["localhost", "127.0.0.1"].includes(parsed.hostname)
-      )
-    )
-      throw Error("URL");
-    if (parsed.username || parsed.password || parsed.search || parsed.hash)
-      throw Error("URL");
+    const project = projectUrl(url);
     let privateKey = key.startsWith("sb_secret_");
     try {
       privateKey ||=
@@ -33,7 +24,7 @@ function configuredClient() {
         "В настройках сборки указан приватный ключ. Удалите его, перевыпустите в Supabase и используйте только Publishable/anon key.";
       return null;
     }
-    return createClient(url, key, {
+    return createClient(project, key, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
@@ -43,7 +34,7 @@ function configuredClient() {
     });
   } catch {
     configurationError =
-      "Публичные настройки синхронизации заполнены неверно. Проверьте URL проекта и Publishable/anon key.";
+      "Адрес синхронизации неверен: нужен Project URL из Supabase → Settings → API (например, https://идентификатор.supabase.co), а не адрес этого сайта.";
     return null;
   }
 }
