@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import katex from 'katex';
-import { linearCards, matchesNumber, validateLinear, sourceFor } from './model';
+import { linearCards, matchesNumber, validateLinear, sourceFor, topics, difficultyLevels, isDifficulty } from './model';
 import { linearSolutions } from './content';
 import coverage from './coverage.json' with { type: "json" };
 import { materials, materialLink } from '../platform/catalog';
@@ -12,6 +12,19 @@ describe('linear algebra workbook', () => {
     expect(new Set(linearCards.map(c => c.book + c.num)).size).toBe(188);
     for (const [book, numbers] of Object.entries(coverage.expected)) for (const n of numbers) expect(linearCards.some(c => c.book === book && c.num === String(n))).toBe(true);
     for (const c of linearCards) { expect(linearSolutions[c.id].length).toBeGreaterThan(50); for (const page of c.pages) expect(sourceFor(c.book, page)?.sha256).toHaveLength(64); }
+  });
+  it('assigns a preparation difficulty to every subpart in all six topics', () => {
+    expect(linearCards.every(c => isDifficulty(c.difficulty))).toBe(true);
+    for (let topic = 0; topic < topics.length; topic++) {
+      const cards = linearCards.filter(c => c.topic === topic);
+      const groups = difficultyLevels.map(level => cards.filter(c => c.difficulty === level.id));
+      expect(groups.every(group => group.length > 0)).toBe(true);
+      expect(groups.flat().map(c => c.id).sort()).toEqual(cards.map(c => c.id).sort());
+    }
+    expect(linearCards.find(c => c.id === 'П82')?.difficulty).toBe('easy');
+    expect(linearCards.find(c => c.id === 'П567')?.difficulty).toBe('medium');
+    expect(linearCards.find(c => c.id === 'П870')?.difficulty).toBe('hard');
+    expect(new Set(linearCards.filter(c => c.book === 'К' && c.num === '17.1').map(c => c.difficulty)).size).toBeGreaterThan(1);
   });
   it('renders every mathematical expression with the site version of KaTeX', () => {
     let count = 0;

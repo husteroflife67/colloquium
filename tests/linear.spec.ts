@@ -99,3 +99,69 @@ test('P870 shows a compatible singular matrix equation with three free parameter
   await expect(solution).not.toContainText('Решений нет');
   await expect(solution.locator('.katex-error')).toHaveCount(0);
 });
+
+test('all topics group every task and subpart from easy to hard in conditions and solutions', async ({ page }) => {
+  for (let topic = 0; topic < 6; topic++) {
+    const expected = linearCards.filter(c => c.topic === topic);
+    for (const tab of ['conditions', 'solutions']) {
+      await page.goto(`/#/linear/study?topic=${topic}&tab=${tab}`);
+      const groups = page.locator('.linear-level-group');
+      await expect(groups).toHaveCount(3);
+      expect(await groups.evaluateAll(elements => elements.map(el => el.getAttribute('data-difficulty')))).toEqual(['easy', 'medium', 'hard']);
+      for (const level of ['easy', 'medium', 'hard']) {
+        const group = page.locator(`.linear-level-group[data-difficulty="${level}"]`);
+        const subset = expected.filter(c => c.difficulty === level);
+        await expect(group.locator(tab === 'conditions' ? '.linear-number-list button' : '.linear-task')).toHaveCount(subset.length);
+        if (tab === 'solutions') expect(await group.locator('.linear-task').evaluateAll(els => els.map(el => el.id.replace('linear-', '')))).toEqual(subset.map(c => c.id));
+      }
+    }
+  }
+});
+
+test('difficulty filter survives reload and tabs, combines with number and remaining filters, and prints only the selection', async ({ page }) => {
+  await page.goto('/#/linear/study?topic=0&tab=solutions');
+  await page.getByLabel('Отметить П 82 решённой').check();
+  await page.getByLabel('Сложность задач').selectOption('easy');
+  await expect(page.locator('.linear-task')).toHaveCount(7);
+  await expect(page.locator('.linear-level-group')).toHaveCount(1);
+  await expect(page).toHaveURL(/difficulty=easy/);
+  await page.getByLabel('Осталось', { exact: true }).check();
+  await expect(page.locator('.linear-task')).toHaveCount(6);
+  await page.getByRole('button', { name: 'Условия', exact: true }).click();
+  await expect(page.getByLabel('Сложность задач')).toHaveValue('easy');
+  await expect(page.getByLabel('Осталось', { exact: true })).toBeChecked();
+  await expect(page.locator('.linear-number-list button')).toHaveCount(6);
+  await expect(page.locator('.linear-source small').first()).not.toContainText('П 86');
+  await page.reload();
+  await expect(page.getByLabel('Сложность задач')).toHaveValue('easy');
+  await expect(page.locator('.linear-number-list button')).toHaveCount(7);
+  await page.getByRole('button', { name: 'Решения', exact: true }).click();
+  await page.getByLabel('Поиск задач линейной алгебры').fill('82');
+  await page.getByLabel('Сложность задач').selectOption('hard');
+  await expect(page.getByLabel('Поиск задач линейной алгебры')).toHaveValue('82');
+  await expect(page.locator('.linear-task')).toHaveCount(0);
+  await expect(page.getByRole('status')).toContainText('Измените сложность');
+  await page.getByLabel('Поиск задач линейной алгебры').fill('');
+  await expect(page.locator('.linear-task')).toHaveCount(13);
+  await page.evaluate(() => { window.print = () => {}; });
+  await page.getByRole('button', { name: 'Печать', exact: true }).click();
+  await expect(page.locator('.linear-solution')).toHaveCount(13);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-algebra-v1')!).done)).toEqual({ 'П82': true });
+});
+
+test('exact material links keep their task visible and difficulty controls fit on phones', async ({ page }) => {
+  await page.goto('/#/linear/study?item=%D0%9F870&difficulty=easy');
+  await expect(page.locator('.linear-task')).toHaveCount(1);
+  await expect(page.locator('.linear-difficulty-badge')).toHaveText('Сложная');
+  await expect(page.getByLabel('Сложность задач')).toHaveValue('hard');
+  for (const width of [320, 375]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/#/linear/study?topic=1');
+    await expect(page.locator('.linear-level-group')).toHaveCount(3);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.getByLabel('Сложность задач').selectOption('hard');
+    await page.getByRole('button', { name: 'Решения', exact: true }).click();
+    await expect(page.locator('.linear-task')).toHaveCount(16);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
