@@ -1,0 +1,303 @@
+{
+ "P010": {
+  "file": "linear/sources/P010.webp",
+  "book": "П",
+  "pdfPage": 10,
+  "printedPage": 13,
+  "sha256": "78f7c3a03e6c0e8d9461e1403c390759ca8ac6b707d24bbfa1059b15964332c5"
+ },
+ "P081": {
+  "file": "linear/sources/P081.webp",
+  "book": "П",
+  "pdfPage": 81,
+  "printedPage": 84,
+  "sha256": "2d207b0ed665b566cb0c14c87839d205e5ee5ec9732a6053d3ccfc1ac1bca42f"
+ },
+ "P082": {
+  "file": "linear/sources/P082.webp",
+  "book": "П",
+  "pdfPage": 82,
+  "printedPage": 85,
+  "sha256": "11dc3a0c658b41641b8512e49aebeef882894f6997ef0c094edad91d07845c59"
+ },
+ "P096": {
+  "file": "linear/sources/P096.webp",
+  "book": "П",
+  "pdfPage": 96,
+  "printedPage": 99,
+  "sha256": "ff1c8e0172692cbf8cb96194b4d9ccf4925a09c7875e2e2931c83d16a361ab80"
+ },
+ "P097": {
+  "file": "linear/sources/P097.webp",
+  "book": "П",
+  "pdfPage": 97,
+  "printedPage": 100,
+  "sha256": "7ebf4a93e259b1050ab06fab4b8e6c90d32b0a415aee5298ae22057c68e7c92a"
+ },
+ "K030": {
+  "file": "linear/sources/K030.webp",
+  "book": "К",
+  "pdfPage": 30,
+  "printedPage": 30,
+  "sha256": "331e0d6960bbbe7978b67ff814fbef09fee3290199dc364b38d05d23d044ff47"
+ },
+ "K031": {
+  "file": "linear/sources/K031.webp",
+  "book": "К",
+  "pdfPage": 31,
+  "printedPage": 31,
+  "sha256": "0e5d0d143c3d653ae55b1d490c28e2868240ff2a0ae598472eadb2bec4ee53ef"
+ },
+ "P099": {
+  "file": "linear/sources/P099.webp",
+  "book": "П",
+  "pdfPage": 99,
+  "printedPage": 102,
+  "sha256": "3c153a4ee9fa4c86c9495a275e877fcd6ee1a1e3cbe9d239aa35d22133569811"
+ },
+ "P100": {
+  "file": "linear/sources/P100.webp",
+  "book": "П",
+  "pdfPage": 100,
+  "printedPage": 103,
+  "sha256": "7cc678ffd035096e66b43d26862695e01d48a7f954f717daf2d5165af090359f"
+ },
+ "K032": {
+  "file": "linear/sources/K032.webp",
+  "book": "К",
+  "pdfPage": 32,
+  "printedPage": 32,
+  "sha256": "fd78a84e08a8bd8a8028a6bd2da0a42c0be0d3458631b7c4c220a9cb2fae729d"
+ },
+ "P109": {
+  "file": "linear/sources/P109.webp",
+  "book": "П",
+  "pdfPage": 109,
+  "printedPage": 112,
+  "sha256": "653225466079f037e79c9979410a84c71740f98a13f7e6791ec3eb17052a1e98"
+ },
+ "P110": {
+  "file": "linear/sources/P110.webp",
+  "book": "П",
+  "pdfPage": 110,
+  "printedPage": 113,
+  "sha256": "17057357bcd7decaf4419adaa945923ea0ffef7ee211fd29e14e259016153c6d"
+ },
+ "P112": {
+  "file": "linear/sources/P112.webp",
+  "book": "П",
+  "pdfPage": 112,
+  "printedPage": 115,
+  "sha256": "681863ab8eba30f73e42d632c2753f7cb1e1fc733bf8b2a1bc5065ed5109f697"
+ },
+ "P113": {
+  "file": "linear/sources/P113.webp",
+  "book": "П",
+  "pdfPage": 113,
+  "printedPage": 116,
+  "sha256": "f03ecb2f0d9b01392bd68757ca7c57626fb20ac1a3ceabe8c49c9899bbf5a5c0"
+ },
+ "P115": {
+  "file": "linear/sources/P115.webp",
+  "book": "П",
+  "pdfPage": 115,
+  "printedPage": 118,
+  "sha256": "602d18e5ff405699aae1495cbf3d1a7a691766f3f146858903556dc658c55b0d"
+ },
+ "P116": {
+  "file": "linear/sources/P116.webp",
+  "book": "П",
+  "pdfPage": 116,
+  "printedPage": 119,
+  "sha256": "ff3956b6fbcb40f75f9e94a0a91d9e454b863bb41b1253dbac0179acce26ad89"
+ },
+ "P122": {
+  "file": "linear/sources/P122.webp",
+  "book": "П",
+  "pdfPage": 122,
+  "printedPage": 125,
+  "sha256": "ca87e21872a421a95070f01331370fd2144710d2214b7a7c8a4a059953081eb0"
+ },
+ "P114": {
+  "file": "linear/sources/P114.webp",
+  "book": "П",
+  "pdfPage": 114,
+  "printedPage": 117,
+  "sha256": "72d16064c6e9366279130474a43a510fe4b7fffb2176aa1d3172f02babe18808"
+ },
+ "K056": {
+  "file": "linear/sources/K056.webp",
+  "book": "К",
+  "pdfPage": 56,
+  "printedPage": 56,
+  "sha256": "8b583454551beb9198e0721cd89383a38170ccba05eaef2a6287141a116d09ba"
+ },
+ "K057": {
+  "file": "linear/sources/K057.webp",
+  "book": "К",
+  "pdfPage": 57,
+  "printedPage": 57,
+  "sha256": "ad83da631921348fb7f855f13e504eec9f29df9c038b4080436e09f8515fd13d"
+ },
+ "K058": {
+  "file": "linear/sources/K058.webp",
+  "book": "К",
+  "pdfPage": 58,
+  "printedPage": 58,
+  "sha256": "0555b2540f6aacaf40f60abfcd20ed8cd5590b4ac29f2085423b2f0ffea733c7"
+ },
+ "K062": {
+  "file": "linear/sources/K062.webp",
+  "book": "К",
+  "pdfPage": 62,
+  "printedPage": 62,
+  "sha256": "02888286ae8a2f957316695708e70bd0c22af32f342d1dcd5e0524993b6a4537"
+ },
+ "K063": {
+  "file": "linear/sources/K063.webp",
+  "book": "К",
+  "pdfPage": 63,
+  "printedPage": 63,
+  "sha256": "ff4365f7c9f14da527c5d5444c94294cb7770daf549c2e1da57a08b10b5d6a51"
+ },
+ "K060": {
+  "file": "linear/sources/K060.webp",
+  "book": "К",
+  "pdfPage": 60,
+  "printedPage": 60,
+  "sha256": "30002e66cc482c65c5f671787fcac30a04675baacea3876a5e1645624695b143"
+ },
+ "K061": {
+  "file": "linear/sources/K061.webp",
+  "book": "К",
+  "pdfPage": 61,
+  "printedPage": 61,
+  "sha256": "97187f96fc2a5ed55a4fea1cdf1b42cfed9c82ea295379f26e0da7eb2cad02f4"
+ },
+ "P013": {
+  "file": "linear/sources/P013.webp",
+  "book": "П",
+  "pdfPage": 13,
+  "printedPage": 16,
+  "sha256": "0b0eff826375551744d77bbf820853bddf373d94725110a2747da956006b280f"
+ },
+ "P014": {
+  "file": "linear/sources/P014.webp",
+  "book": "П",
+  "pdfPage": 14,
+  "printedPage": 17,
+  "sha256": "2f11f59b800dba22659c6142b59e6f6ab01eac13b2b5a6c95a3b0ac781ee326e"
+ },
+ "P015": {
+  "file": "linear/sources/P015.webp",
+  "book": "П",
+  "pdfPage": 15,
+  "printedPage": 18,
+  "sha256": "b9ef0719825ab1aa6affb1b6f3e56b6a8901c9f3e4d62bf87fe21fc3140fbeb2"
+ },
+ "P016": {
+  "file": "linear/sources/P016.webp",
+  "book": "П",
+  "pdfPage": 16,
+  "printedPage": 19,
+  "sha256": "32cd05459547a147375e50ce92ccc472e6568d2c3d257dd280fc6aa321a70f79"
+ },
+ "K014": {
+  "file": "linear/sources/K014.webp",
+  "book": "К",
+  "pdfPage": 14,
+  "printedPage": 14,
+  "sha256": "d15c46d0e83c4a9431e1e6594d293876ec3f4e2b48120b8665e297c99c258479"
+ },
+ "K015": {
+  "file": "linear/sources/K015.webp",
+  "book": "К",
+  "pdfPage": 15,
+  "printedPage": 15,
+  "sha256": "5a945a3d4e5d5e3ceefee2757f966e46a1f042ad3ed21a77f42f95827e064229"
+ },
+ "K016": {
+  "file": "linear/sources/K016.webp",
+  "book": "К",
+  "pdfPage": 16,
+  "printedPage": 16,
+  "sha256": "16c70c9079b1ea949ffdd0b3313eab392e8349f489d9042ac31e823828f392a2"
+ },
+ "P018": {
+  "file": "linear/sources/P018.webp",
+  "book": "П",
+  "pdfPage": 18,
+  "printedPage": 21,
+  "sha256": "4fad3ec218cf3e60aecd5ff1d3b0134eb1510be7b31ac1d34b378e31176781f9"
+ },
+ "P019": {
+  "file": "linear/sources/P019.webp",
+  "book": "П",
+  "pdfPage": 19,
+  "printedPage": 22,
+  "sha256": "8717d78d9a0c1db602ea59d5fa97c47f4a405a376aa4d0526f827dd4f50bbc6f"
+ },
+ "K040": {
+  "file": "linear/sources/K040.webp",
+  "book": "К",
+  "pdfPage": 40,
+  "printedPage": 40,
+  "sha256": "464f171b18dc259649e263612d8c8a5cefd3d07977b5f7e1c6590c249e458d88"
+ },
+ "P020": {
+  "file": "linear/sources/P020.webp",
+  "book": "П",
+  "pdfPage": 20,
+  "printedPage": 23,
+  "sha256": "4f43cf937b459eaee3fb1fc625d7948b92e3b4f863c6cfdd2b9c4daca2631ef6"
+ },
+ "P021": {
+  "file": "linear/sources/P021.webp",
+  "book": "П",
+  "pdfPage": 21,
+  "printedPage": 24,
+  "sha256": "88c44c016edcc7d7821b50a53f2f07ff1729d47696e014a3bed1b4f130fc3e51"
+ },
+ "K041": {
+  "file": "linear/sources/K041.webp",
+  "book": "К",
+  "pdfPage": 41,
+  "printedPage": 41,
+  "sha256": "f9872b193d8bc5c7321e8496dcf99136d50cef3bc23084fa5078c2a22a764c08"
+ },
+ "K042": {
+  "file": "linear/sources/K042.webp",
+  "book": "К",
+  "pdfPage": 42,
+  "printedPage": 42,
+  "sha256": "5d8a5d2b832305c278f4ace9239ce707b0132acc611777e59961db14ab3e5511"
+ },
+ "P025": {
+  "file": "linear/sources/P025.webp",
+  "book": "П",
+  "pdfPage": 25,
+  "printedPage": 28,
+  "sha256": "927ed16a2a7a397cfa55182a5f19d4b6007a228a9277ca5643adb641bc2c4460"
+ },
+ "P022": {
+  "file": "linear/sources/P022.webp",
+  "book": "П",
+  "pdfPage": 22,
+  "printedPage": 25,
+  "sha256": "5e9a7121a0c4f3c9c7924ec57eb454479bc9b4b1641a7eaf4e3c5d37641b530a"
+ },
+ "P033": {
+  "file": "linear/sources/P033.webp",
+  "book": "П",
+  "pdfPage": 33,
+  "printedPage": 36,
+  "sha256": "480ffe2b4e128746ffb5dc9a74baff30112a3359665e14e81c5e9d36fa38228c"
+ },
+ "P037": {
+  "file": "linear/sources/P037.webp",
+  "book": "П",
+  "pdfPage": 37,
+  "printedPage": 40,
+  "sha256": "591d1342618d17cbe49016297f28af2e65a1c6d99424ac6a4bf0d948b30c81da"
+ }
+}

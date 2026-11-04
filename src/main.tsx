@@ -11,6 +11,7 @@ const SearchPage = lazy(() => import("./platform/SearchPage"));
 const Recovery = lazy(() => import("./platform/Recovery"));
 const Discrete = lazy(() => import("./DiscreteApp"));
 const Calculus = lazy(() => import("./calculus/main"));
+const Linear = lazy(() => import("./linear/LinearApp"));
 function Platform() {
   const [hash, setHash] = useState(location.hash);
   useEffect(() => {
@@ -23,11 +24,11 @@ function Platform() {
     window.addEventListener("keydown", shortcut); return () => window.removeEventListener("keydown", shortcut);
   }, []);
   const route = hash.split("?")[0];
-  const course = hash.startsWith("#/calculus/") ? "calculus" : hash.startsWith("#/discrete/") ? "discrete" : null;
+  const course = hash.startsWith("#/calculus/") ? "calculus" : hash.startsWith("#/discrete/") ? "discrete" : hash.startsWith("#/linear/") ? "linear" : null;
   const view = hash === "#/bookmarks" ? "bookmarks" : hash === "#/mistakes" ? "mistakes" : "home";
-  useEffect(() => { document.title = course === "calculus" ? "Коллоквиум · Математический анализ" : course === "discrete" ? "Коллоквиум · Дискретная математика" : "Коллоквиум · два курса"; if (course !== "calculus") delete document.documentElement.dataset.theme; }, [course]);
+  useEffect(() => { document.title = course === "calculus" ? "Коллоквиум · Математический анализ" : course === "discrete" ? "Коллоквиум · Дискретная математика" : course === "linear" ? "Коллоквиум · Линейная алгебра" : "Коллоквиум · три курса"; if (course !== "calculus") delete document.documentElement.dataset.theme; }, [course]);
   return <><Suspense fallback={<p className="platform-page" role="status">Загружаем курс…</p>}>
-    {course ? <div className={`platform-course platform-course-${course}`} key={course}>{course === "calculus" ? <Calculus /> : <Discrete />}</div> : route === "#/search" ? <SearchPage /> : route === "#/recovery" ? <Recovery /> : <Home key={hash} view={view} />}
+    {course ? <div className={`platform-course platform-course-${course}`} key={course}>{course === "calculus" ? <Calculus /> : course === "linear" ? <Linear /> : <Discrete />}</div> : route === "#/search" ? <SearchPage /> : route === "#/recovery" ? <Recovery /> : <Home key={hash} view={view} />}
   </Suspense><style>{`${platformStyle}\n${courseTheme}\n${studyToolsStyle}`}</style></>;
 }
 createRoot(document.getElementById("root")!).render(<React.StrictMode><SyncProvider><Platform /></SyncProvider></React.StrictMode>);

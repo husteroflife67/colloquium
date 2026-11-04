@@ -2,12 +2,18 @@ import course from "../data/course.json" with { type: "json" };
 import { practice } from "../practice-model";
 import { items, topics } from "../calculus/content";
 import { materialKey, materials, type Material } from "./catalog";
+import { linearCards, topics as linearTopics, cardLabel, sourceFor } from "../linear/model";
 
 export type StudyContent = {
   prompt: string; answer: string[]; hint: string; example: string[];
   note: string; topic: string; source?: { title: string; path: string };
 };
 export function studyContent(m: Material): StudyContent {
+  if (m.course === "linear") {
+    const card = linearCards.find(c => c.id === m.id)!;
+    const source = sourceFor(card.book, card.pages[0]);
+    return { prompt: `${cardLabel(card)} · ${card.title}. Оригинал условия — на скане сборника.`, answer: [linearTopics[card.topic].desc, "Полный пошаговый разбор открывается в карточке задачи."], hint: linearTopics[card.topic].desc, example: [], topic: linearTopics[card.topic].name, note: "Авторское решение по предоставленному сборнику", source: { title: `${card.book === 'П' ? 'Проскуряков' : 'Кострикин'} · стр. ${source.printedPage}`, path: source.file } };
+  }
   if (m.course === "calculus") {
     const i = items.find(i => i.id === m.id)!;
     return {

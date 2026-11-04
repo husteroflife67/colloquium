@@ -5,8 +5,9 @@ import { items } from "../calculus/content";
 import { validateQuestions } from "../calculus/sync-model";
 import { platformKey, validatePlatform } from "./platform-state";
 import { progressWritten, announceProgress } from "../progress-events";
+import { linearKey, validateLinear } from "../linear/model";
 
-export const backupKeys = [...Object.values(localKeys), "predel-v1", "predel-v1-questions", platformKey];
+export const backupKeys = [...Object.values(localKeys), "predel-v1", "predel-v1-questions", platformKey, linearKey];
 export type UnifiedBackup = { format: "colloquium-platform-backup"; version: 1; data: Record<string, unknown> };
 const ids = new Set(items.map(i => i.id));
 export function exportBackup(): UnifiedBackup {
@@ -30,6 +31,7 @@ export function parseBackup(raw: unknown): Record<string, unknown> {
   for (const [key, value] of Object.entries(data)) {
     if (value == null) continue;
     if (key === "predel-v1") result[key] = validateImport(value, ids, items);
+    else if (key === linearKey) result[key] = validateLinear(value);
     else if (key === "predel-v1-questions") result[key] = validateQuestions(value);
     else if (key === platformKey) {
       result[key] = validatePlatform(value);
@@ -62,6 +64,10 @@ export function prepareImport(incoming: Record<string, unknown>, choice: "local"
       if (local) validatePlatform(local);
       const sessions = mergeRecord(Object.fromEntries((local?.sessions ?? []).map((s: any) => [s.id, s])), Object.fromEntries((next.sessions ?? []).map((s: any) => [s.id, s])));
       merged = { version: 1, bookmarks: [...new Set([...(local?.bookmarks ?? []), ...next.bookmarks])], ...(Object.keys(sessions).length ? { sessions: Object.values(sessions).sort((a, b) => Date.parse(b.started) - Date.parse(a.started)) } : {}) };
+    }
+    else if (key === linearKey) {
+      if (local) validateLinear(local);
+      merged = { version: 1, done: mergeRecord(local?.done ?? {}, next.done) };
     }
     else if (key === "predel-v1-questions") {
       if (local) validateQuestions(local);

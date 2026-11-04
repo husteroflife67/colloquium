@@ -15,6 +15,7 @@ import { readSaved } from "../model";
 import { loadPractice } from "../practice-model";
 import { loadPlan, planProgress } from "../plan-model";
 import { ArrowUpRight, ArrowRight, Bookmark as BookmarkIcon, BookOpen, Layers3, Route, NotebookPen, ShieldCheck, Download, Upload, Sparkles, Search, Target, CheckCircle2 } from "lucide-react";
+import { linearCards, loadLinear } from "../linear/model";
 import { LearningArt } from "./LearningArt";
 
 function ProgressMeter({ value, total, label }: { value: number; total: number; label: string }) {
@@ -33,7 +34,8 @@ function readSnapshot() {
     return raw ? validateImport(JSON.parse(raw), new Set(items.map(i => i.id)), items) : emptyData();
   }, emptyData(), "матанализ");
   const platform = safe(readPlatform, { version: 1 as const, bookmarks: [] }, "закладки");
-  return { discrete, practice, plan, calculus, platform, errors };
+  const linear = safe(loadLinear, { version: 1 as const, done: {} }, "линейная алгебра");
+  return { discrete, practice, plan, calculus, linear, platform, errors };
 }
 export default function Home({ view }: { view: string }) {
   const [snapshot, refresh] = useState(readSnapshot);
@@ -54,6 +56,7 @@ export default function Home({ view }: { view: string }) {
   const discreteKnown = courseData.questions.filter(q => snapshot.discrete.progress[q.id]?.status === "known").length;
   const practiceKnown = practiceCatalog.items.filter(q => snapshot.practice.progress[q.id] === "independent").length;
   const calculusKnown = items.filter(i => snapshot.calculus.ratings[i.id] === "known").length;
+  const linearDone = linearCards.filter(c => snapshot.linear.done[c.id]).length;
   const reviewDue = dueItems(items, snapshot.calculus.schedules ?? {}, Date.now()).filter(i => snapshot.calculus.schedules?.[i.id]).length;
   const entry = (m: Material) => <><a href={materialLink(m)}><MathText text={m.title} /></a><small>{courses[m.course].title} · {m.kind === "practice" ? "Практика" : m.kind === "definition" ? "Формулировка" : "Теория"}</small></>;
   return <>
@@ -63,13 +66,13 @@ export default function Home({ view }: { view: string }) {
         <div className="platform-intro-copy">
           <div className="platform-kicker"><span /><span>{view === "home" ? "МЕСТО, ГДЕ СТАНОВИТСЯ ПОНЯТНО" : "ТВОЁ УЧЕБНОЕ ПРОСТРАНСТВО"}</span></div>
           <h1>{view === "bookmarks" ? "Закладки" : view === "mistakes" ? "Журнал ошибок" : <>Продолжить <span>подготовку</span></>}</h1>
-          <p className="platform-lead">{view === "home" ? "От первого «что это?» до уверенного ответа у доски. Два курса, понятный маршрут и твой собственный темп." : view === "bookmarks" ? "Всё, к чему хочется вернуться. Важные определения, непростые доказательства и хорошие идеи." : "Затруднение — тоже точка роста. Вернись к сложному и попробуй ещё раз."}</p>
+          <p className="platform-lead">{view === "home" ? "От первого «что это?» до уверенного ответа у доски. Три курса, понятный маршрут и твой собственный темп." : view === "bookmarks" ? "Всё, к чему хочется вернуться. Важные определения, непростые доказательства и хорошие идеи." : "Затруднение — тоже точка роста. Вернись к сложному и попробуй ещё раз."}</p>
           {view === "home" && <a href="#/search" className="study-home-search"><Search size={19} /><span>Найти определение, доказательство или задачу</span><kbd>Ctrl K</kbd></a>}
-          {view === "home" && <div className="platform-hero-tags"><span><BookOpen size={15} /> 2 курса</span><span><Layers3 size={15} /> {materials.length} материалов</span><span><Sparkles size={15} /> Учиться понимать</span></div>}
+          {view === "home" && <div className="platform-hero-tags"><span><BookOpen size={15} /> 3 курса</span><span><Layers3 size={15} /> {materials.length} материалов</span><span><Sparkles size={15} /> Учиться понимать</span></div>}
         </div>
         {view === "home" ? <div className="platform-intro-art"><LearningArt /><span className="platform-art-note">Из маленьких шагов<br /><b>складывается понимание.</b></span></div> : <div className="platform-view-symbol" aria-hidden="true">{view === "bookmarks" ? <BookmarkIcon /> : <NotebookPen />}</div>}
       </section>
-      <nav className="platform-sections" aria-label="Разделы платформы"><a className={view === "home" ? "is-active" : ""} aria-current={view === "home" ? "page" : undefined} href="#/home"><Layers3 size={17} />Оба курса</a><a className={view === "bookmarks" ? "is-active" : ""} aria-current={view === "bookmarks" ? "page" : undefined} href="#/bookmarks"><BookmarkIcon size={17} />Закладки <span>{bookmarks.length}</span></a><a className={view === "mistakes" ? "is-active" : ""} aria-current={view === "mistakes" ? "page" : undefined} href="#/mistakes"><NotebookPen size={17} />Журнал <span>{journal.length}</span></a><a href="#/discrete/sync"><ShieldCheck size={17} />Аккаунт и синхронизация <ArrowUpRight size={14} /></a></nav>
+      <nav className="platform-sections" aria-label="Разделы платформы"><a className={view === "home" ? "is-active" : ""} aria-current={view === "home" ? "page" : undefined} href="#/home"><Layers3 size={17} />Все курсы</a><a className={view === "bookmarks" ? "is-active" : ""} aria-current={view === "bookmarks" ? "page" : undefined} href="#/bookmarks"><BookmarkIcon size={17} />Закладки <span>{bookmarks.length}</span></a><a className={view === "mistakes" ? "is-active" : ""} aria-current={view === "mistakes" ? "page" : undefined} href="#/mistakes"><NotebookPen size={17} />Журнал <span>{journal.length}</span></a><a href="#/discrete/sync"><ShieldCheck size={17} />Аккаунт и синхронизация <ArrowUpRight size={14} /></a></nav>
       {snapshot.errors.length > 0 && <p role="alert">Не удалось прочитать: {snapshot.errors.join(", ")}. Исходные записи сохранены. Экспортируйте их со старого сайта перед восстановлением.</p>}
       {view === "home" && <>
         <div className="platform-section-title"><div><span className="platform-overline">ОДИН ШАГ БЛИЖЕ К КОЛЛОКВИУМУ</span><h2>Твои курсы<span className="platform-title-dot">.</span></h2></div><span className="platform-section-caption">Выбирай, с чего начнём сегодня</span></div>
@@ -86,16 +89,22 @@ export default function Home({ view }: { view: string }) {
             <a className="platform-action" href="#/calculus/today">Продолжить матанализ <ArrowRight size={18} /></a>
             </div>
           </section>
+          <section className="platform-card platform-card-linear"><div className="platform-course-art"><span className="platform-module">02 / МОДУЛЬ</span><LearningArt variant="linear" /></div><div className="platform-card-body"><div className="platform-course-meta"><span>СИСТЕМЫ · МАТРИЦЫ · ОПРЕДЕЛИТЕЛИ</span><ArrowUpRight size={20} /></div><h2>{courses.linear.title}</h2><p className="platform-card-description">Оригинальные условия и подробный путь к ответу.</p>
+            <div className="platform-card-stats"><div><strong>188</strong><span>Номеров из сводки</span></div><div><strong>{linearDone} / 288</strong><span>Задач решено</span></div><div><strong>6</strong><span>Тематических блоков</span></div></div>
+            <ProgressMeter value={linearDone} total={288} label="Решённые задачи линейной алгебры" />
+            <a className="platform-action" href="#/linear/study">Продолжить линейную алгебру <ArrowRight size={18} /></a>
+            </div>
+          </section>
         </div>
         <a className="study-home-recovery" href="#/recovery"><span className="study-home-recovery-icon"><Target /></span><span><b>Разобрать сложное</b><small>{pending.length ? `${pending.length} материалов из журнала ждут повторного ответа` : "Тренировка по затруднениям из завершённых билетов"}</small></span><ArrowUpRight size={23} /></a>
         <div className="platform-next-steps"><div><span className="platform-overline">ХОРОШАЯ ПРИВЫЧКА</span><h2>Немного практики.<br /> Больше уверенности.</h2><p>Начни с понятного шага — остальное сложится.</p></div><a href="#/discrete/plan"><span className="platform-shortcut-icon"><Route /></span><span><b>Пройти по маршруту</b><small>План дискретной математики</small></span><ArrowUpRight /></a><a href="#/calculus/oral"><span className="platform-shortcut-icon"><BookOpen /></span><span><b>Ответить у доски</b><small>Устный экзаменатор матанализа</small></span><ArrowUpRight /></a></div>
-        <section className="platform-section platform-backup-section"><div className="platform-backup-heading"><span className="platform-backup-icon"><ShieldCheck size={26} /></span><div><span className="platform-overline">ПРОГРЕСС С ТОБОЙ</span><h2>Резервная копия обоих курсов</h2></div></div><p>Сохрани оценки, билеты, тренировки, черновики и закладки одним файлом. Можно загрузить и прежние копии обоих приложений.</p>
+        <section className="platform-section platform-backup-section"><div className="platform-backup-heading"><span className="platform-backup-icon"><ShieldCheck size={26} /></span><div><span className="platform-overline">ПРОГРЕСС С ТОБОЙ</span><h2>Резервная копия всех курсов</h2></div></div><p>Сохрани оценки, билеты, тренировки, черновики, закладки и отметки решённых задач одним файлом. Можно загрузить и прежние копии обоих приложений.</p>
           <div className="platform-backup"><button onClick={() => {
             try {
               const blob = new Blob([JSON.stringify(exportBackup(), null, 2)], { type: "application/json" });
               const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "colloquium-platform-progress-v1.json"; a.click(); URL.revokeObjectURL(url);
             } catch { setNotice("Не удалось экспортировать данные. Проверьте сообщение об ошибке чтения сохранений."); }
-          }}><Download size={17} /> Экспорт обоих курсов</button>
+          }}><Download size={17} /> Экспорт всех курсов</button>
           <label className="platform-file"><Upload size={17} /> Выбрать файл прогресса<input aria-label="Импорт прогресса платформы" type="file" accept=".json,application/json" onChange={async e => {
             const file = e.target.files?.[0]; if (!file) return;
             setIncoming(null); setNotice("");
@@ -111,10 +120,10 @@ export default function Home({ view }: { view: string }) {
         </section>
         <div className="platform-sync-note"><ShieldCheck size={16} /><PlatformSyncSummary /></div>
       </>}
-      {view !== "home" && <><label>Курс <select aria-label="Фильтр курса" value={filter} onChange={e => setFilter(e.target.value as typeof filter)}><option value="all">Оба курса</option><option value="discrete">Дискретная математика</option><option value="calculus">Матанализ</option></select></label>
+      {view !== "home" && <><label>Курс <select aria-label="Фильтр курса" value={filter} onChange={e => setFilter(e.target.value as typeof filter)}><option value="all">Все курсы</option><option value="discrete">Дискретная математика</option><option value="calculus">Матанализ</option>{view === "bookmarks" && <option value="linear">Линейная алгебра</option>}</select></label>
         {view === "bookmarks" ? <><p>Закладка сохраняется отдельно от самооценки и не меняет прогресс.</p><ul className="platform-list">{list.filter(m => filter === "all" || m.course === filter).map(m => <li key={materialKey(m)}>{entry(m)}<Bookmark {...m} /></li>)}</ul>{!list.length && <p>Закладок пока нет. Добавьте материал кнопкой «В закладки» в его карточке.</p>}</> : <><div className="study-journal-cta"><div><Target size={25} /><span><b>{pending.filter(j => filter === "all" || j.material.course === filter).length} материалов для тренировки</b><small>Вспомни, сверься с разбором и сохрани новую самооценку.</small></span></div><a className="study-solid-button" href={filter === "all" ? "#/recovery" : `#/recovery?course=${filter}`}>Разобрать сложное <ArrowRight size={17} /></a></div><p>Здесь собраны низкие самооценки из завершённых билетов. Это история затруднений, а не автоматическая проверка. Новая оценка материала не изменяет прошлый результат.</p><ul className="platform-list">{journal.filter(j => filter === "all" || j.material.course === filter).map((j, n) => <li key={`${j.material.course}-${j.ticketId}-${n}`}>{entry(j.material)}{latestRecovery(snapshot.platform, materialKey(j.material))?.rating === "understood" && latestRecovery(snapshot.platform, materialKey(j.material))?.sourceTicketId === j.ticketId && <span className="study-resolved"><CheckCircle2 size={13} />Разобрано в тренировке</span>}<small>{new Date(j.date).toLocaleString("ru-RU")} · {j.label}</small></li>)}</ul>{!journal.length && <p>Пока нет завершённых билетов с низкими самооценками.</p>}</>}
       </>}
-      <footer className="platform-footer"><a href="#/home">Коллоквиум<span>↗</span></a><span>Понимать. Доказывать. Получать удовольствие.</span><span>Дискретная математика + матанализ</span></footer>
+      <footer className="platform-footer"><a href="#/home">Коллоквиум<span>↗</span></a><span>Понимать. Доказывать. Получать удовольствие.</span><span>Дискра + матанализ + линейная алгебра</span></footer>
     </main>
   </>;
 }

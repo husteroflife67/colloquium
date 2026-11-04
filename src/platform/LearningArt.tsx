@@ -1,5 +1,10 @@
 /** Decorative vector artwork; it never presents invented learning statistics. */
-export function LearningArt({ variant = "hero" }: { variant?: "hero" | "discrete" | "calculus" }) {
+export function LearningArt({ variant = "hero" }: { variant?: "hero" | "discrete" | "calculus" | "linear" }) {
+  if (variant === "linear") return <svg className="learning-art" viewBox="0 0 480 180" fill="none" aria-hidden="true">
+    <path d="M0 35H480M0 85H480M0 135H480M45 0V180M110 0V180M175 0V180M240 0V180M305 0V180M370 0V180M435 0V180" stroke="#594775" opacity=".12" />
+    <g transform="rotate(-6 170 90)"><rect x="65" y="26" width="215" height="130" rx="18" fill="#fffdf5" stroke="#44345c" strokeWidth="2" /><path d="M99 50H87v82h12m145-82h12v82h-12" stroke="#44345c" strokeWidth="3" /><g fill="#715591"><circle cx="124" cy="66" r="7" /><circle cx="174" cy="66" r="7" /><circle cx="224" cy="66" r="7" /><circle cx="124" cy="97" r="7" /><circle cx="174" cy="97" r="7" /><circle cx="224" cy="97" r="7" /></g><path d="M119 122h10m40 0h10m40 0h10" stroke="#e19472" strokeWidth="5" strokeLinecap="round" /></g>
+    <g transform="rotate(7 357 93)"><rect x="303" y="38" width="108" height="108" rx="19" fill="#badfc9" stroke="#44345c" strokeWidth="2" /><path d="M326 120h63M336 130V57m0 63 46-48m-11 0h11v11" stroke="#44345c" strokeWidth="3" strokeLinecap="round" /><circle cx="359" cy="95" r="6" fill="#f1b095" stroke="#44345c" strokeWidth="2" /></g>
+  </svg>;
   if (variant === "discrete") return <svg className="learning-art" viewBox="0 0 480 180" fill="none" aria-hidden="true">
     <path d="M0 140H480M30 0V180M100 0V180M170 0V180M240 0V180M310 0V180M380 0V180M450 0V180" stroke="#1e6050" opacity=".12" />
     <g className="art-orbit" stroke="#203b35" strokeWidth="2"><path d="m290 47 85-18 50 90-101 30-34-102 135 72M290 47l135 72M375 29l-51 120" /><circle cx="290" cy="47" r="14" fill="#fff8de" /><circle cx="375" cy="29" r="14" fill="#ad95ed" /><circle cx="425" cy="119" r="14" fill="#ff916b" /><circle cx="324" cy="149" r="14" fill="#fff8de" /></g>
