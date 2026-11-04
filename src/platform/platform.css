@@ -236,3 +236,51 @@ body { margin: 0; }
 .platform-card-linear .platform-action { background: #7955a7; color: white; border-color: #7955a7; }
 .platform-card-linear .platform-action:hover { background: #67458f; }
 .study-result-linear .study-result-meta > span:first-child { background: #e9dff6; color: #6f4c9a; }
+
+/* A shared finish for the course library. */
+@media screen {
+  .platform-bar { box-shadow: 0 4px 24px #36204605; }
+  .platform-brand-mark { background: linear-gradient(145deg, #40304f, #282135); box-shadow: 0 4px 12px #35224318; }
+  .platform-intro-home { padding: 28px 30px; border: 1px solid #e9e0ef; border-radius: 26px; background: radial-gradient(ellipse at 92% 12%, #e9e2f580, transparent 58%), linear-gradient(120deg, #fffdf9, #f9f4ef); }
+  .platform-intro-home .platform-intro-copy { min-width: 0; }
+  .platform-intro-home .platform-intro-art { max-width: 420px; }
+  .platform-intro-home .study-home-search { background: #fffdfc; box-shadow: 0 4px 14px #46305605; }
+  .platform-card { display: flex; flex-direction: column; box-shadow: 0 5px 20px #3a245507; }
+  .platform-card-body { display: flex; flex: 1; flex-direction: column; }
+  .platform-card .platform-meter { margin-top: auto; padding-top: 9px; }
+  .platform-card .platform-action { min-height: 46px; }
+  .platform-card-discrete .platform-module { background: #f6fff9ee; }
+  .platform-card-calculus .platform-module { background: #fff5eeee; }
+  .platform-card-linear .platform-module { background: #f8f2ffed; color: #684689; }
+  .platform-course-meta { gap: 8px; line-height: 1.7; }
+  .platform-course-meta svg { flex-shrink: 0; }
+  .platform-meter-track { height: 6px; }
+  .platform-sections { gap: 5px; }
+  .platform-sections a.is-active { box-shadow: inset 0 0 0 1px #dfd0ed; }
+  .platform-section { box-shadow: 0 6px 24px #3a245504; }
+  .platform-header-links a { padding: 7px 0; }
+}
+@media screen and (min-width: 1120px) {
+  .platform-courses { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .platform-course-art { height: 158px; }
+  .platform-card-body { padding: 24px 23px; }
+  .platform-card h2 { font-size: 25px; min-height: 63px; }
+  .platform-course-meta { font-size: 8px; min-height: 28px; }
+  .platform-page .platform-card-description { min-height: 40px; margin-bottom: 15px; font-size: 12px; }
+  .platform-card-stats { gap: 7px; }
+  .platform-card-stats strong { font-size: 17px; }
+  .platform-card-stats span { font-size: 9px; }
+  .platform-card .platform-action { font-size: 11px; padding: 12px; }
+}
+@media screen and (max-width: 740px) {
+  .platform-intro-home { padding: 22px; border-radius: 21px; }
+  .platform-intro-home .platform-intro-art { max-width: 350px; }
+}
+@media screen and (max-width: 560px) {
+  .platform-intro-home { padding: 22px 18px 10px; }
+  .platform-intro-home h1 { font-size: clamp(30px, 8.4vw, 39px); letter-spacing: -1.5px; }
+  .platform-intro-home .platform-kicker { font-size: 6px; letter-spacing: 1.2px; }
+  .platform-intro-home .platform-lead { margin: 24px 0 18px; }
+  .platform-intro-home .platform-intro-art { height: 190px; }
+  .platform-intro-home .platform-hero-tags { gap: 12px; font-size: 8px; }
+}
