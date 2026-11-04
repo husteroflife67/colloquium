@@ -1,3 +1,4 @@
+import { switchCourse } from "./course-navigation";
 import { test, expect } from "@playwright/test";
 import { items } from "../src/calculus/content";
 import { emptyData, generateTicket } from "../src/calculus/engine";
@@ -24,9 +25,9 @@ test("old progress is detected across courses, sources are available, and switch
   await expect(page.getByRole("heading", { name: "Продолжить подготовку" })).toBeVisible();
   await expect(page.locator(".platform-card").first()).toContainText("1 / 46");
   await expect(page.locator(".platform-card").nth(1)).toContainText("1 / 87");
-  await page.getByLabel("Выбрать курс").selectOption("calculus");
+  await switchCourse(page, "calculus");
   await expect(page.locator(".sidebar")).toContainText("Устный экзаменатор");
-  await page.getByLabel("Выбрать курс").selectOption("discrete");
+  await switchCourse(page, "discrete");
   await expect(page.locator(".sidebar")).toContainText("План подготовки");
   const saved = await page.evaluate(keys => Object.fromEntries(keys.map(key => [key, JSON.parse(localStorage.getItem(key)!)])), Object.keys(seed));
   expect(saved).toEqual(seed);
@@ -83,9 +84,9 @@ test("malformed backup cannot overwrite progress; mobile course switching and bo
   await page.getByLabel("Импорт прогресса платформы").setInputFiles({ name: "broken.json", mimeType: "application/json", buffer: Buffer.from('{"schemaVersion":1}') });
   await expect(page.getByRole("status")).toBeVisible();
   await expect(page.getByRole("button", { name: "Объединить прогресс" })).toHaveCount(0);
-  await page.getByLabel("Выбрать курс").selectOption("calculus");
+  await switchCourse(page, "calculus");
   await expect(page.locator(".platform-bar")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  await page.getByLabel("Выбрать курс").selectOption("discrete");
+  await switchCourse(page, "discrete");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });

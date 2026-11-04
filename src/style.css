@@ -566,7 +566,7 @@ nav button.active svg {
   bottom: 47px;
   font-size: 12px;
   color: var(--green);
-  background: white;
+  background: var(--ds-surface);
 }
 .topic-top {
   display: flex;
@@ -658,7 +658,7 @@ nav button.active svg {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: white;
+  background: var(--ds-surface);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px 12px;
@@ -683,7 +683,7 @@ nav button.active svg {
 select {
   border: 1px solid var(--border);
   border-radius: 5px;
-  background: white;
+  background: var(--ds-surface);
   padding: 10px 28px 10px 12px;
   color: var(--ds-muted);
   font-size: 12px;
@@ -691,7 +691,7 @@ select {
 .question-list {
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: white;
+  background: var(--ds-surface);
   overflow: hidden;
 }
 .question-list:empty {
@@ -1089,7 +1089,7 @@ textarea::placeholder {
   gap: 32px;
   padding: 32px;
   border: 1px solid var(--border);
-  background: white;
+  background: var(--ds-surface);
   border-radius: 10px;
   margin-bottom: 24px;
 }
@@ -1104,7 +1104,7 @@ textarea::placeholder {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: white;
+  background: var(--ds-surface);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1120,7 +1120,7 @@ textarea::placeholder {
   margin-top: 4px;
 }
 .progress-topics {
-  background: white;
+  background: var(--ds-surface);
   border: 1px solid var(--border);
   border-radius: 9px;
   margin-bottom: 32px;
@@ -1151,7 +1151,7 @@ textarea::placeholder {
   gap: 15px;
   border: 1px solid var(--border);
   border-radius: 7px;
-  background: white;
+  background: var(--ds-surface);
   width: 100%;
   margin-bottom: 10px;
   text-align: left;
@@ -1609,7 +1609,7 @@ textarea::placeholder {
 }
 .ticket-mode-switch button.active,
 .practice-tabs button.active {
-  background: white;
+  background: var(--ds-surface);
   color: var(--ds-muted);
   box-shadow: 0 1px 5px #203c3010;
 }
@@ -1719,7 +1719,7 @@ textarea::placeholder {
 .material-card {
   padding: 20px;
   border: 1px solid var(--border);
-  background: white;
+  background: var(--ds-surface);
   border-radius: 9px;
   display: flex;
   flex-direction: column;
@@ -1843,7 +1843,7 @@ textarea::placeholder {
   padding: 11px 16px;
   font-size: 12px;
   color: var(--ds-muted);
-  background: white;
+  background: var(--ds-surface);
 }
 .secondary-button:hover {
   background: var(--ds-soft);
@@ -2067,7 +2067,7 @@ textarea::placeholder {
 }
 .proof-ticket-question {
   border: 1px solid var(--border);
-  background: white;
+  background: var(--ds-surface);
   border-radius: 9px;
   padding: 25px;
   margin-bottom: 20px;
@@ -3252,7 +3252,7 @@ textarea::placeholder {
   padding: 10px 12px;
   border: 1px solid var(--ds-line);
   border-radius: 5px;
-  background: white;
+  background: var(--ds-surface);
   max-width: 400px;
   width: 100%;
   display: block;
@@ -3281,7 +3281,7 @@ textarea::placeholder {
 .sync-import input::file-selector-button {
   border: 1px solid var(--ds-line);
   padding: 8px 12px;
-  background: white;
+  background: var(--ds-surface);
   border-radius: 4px;
   color: var(--ds-muted);
   cursor: pointer;

@@ -1,22 +1,15 @@
 /* Shared semantic contracts. Loaded after course layout styles; no duplicate legacy theme. */
 :root {
-  --ds-bg:#f7f8fa; --ds-surface:#fff; --ds-soft:#f0f1f7; --ds-ink:#171923;
-  --ds-muted:#626879; --ds-line:#e4e7ec; --ds-accent:#6268d9; --ds-on-accent:#fff;
-  --ds-accent-soft:#eeedff; --ds-accent-hover:#5157c4; --ds-focus:#6268d9;
-  --ds-success:#23774d; --ds-success-bg:#edf8f2; --ds-warning:#945717; --ds-warning-bg:#fff7e9;
-  --ds-danger:#bc3547; --ds-danger-bg:#fff0f2; --ds-radius:12px; --ds-sidebar:248px;
+  --ds-bg:#0d0f14; --ds-sidebar-bg:#11131b; --ds-surface:#171922; --ds-soft:#20232e; --ds-ink:#f0f2f8;
+  --ds-muted:#abb0c1; --ds-line:#303441; --ds-accent:#a494ff; --ds-on-accent:#171326;
+  --ds-accent-soft:#2b2541; --ds-accent-hover:#bdadff; --ds-focus:#b5a5ff; --ds-action:#7051cb;
+  --ds-success:#84d5a8; --ds-success-bg:#18332a; --ds-warning:#edc080; --ds-warning-bg:#392d1e;
+  --ds-danger:#ffa1b0; --ds-danger-bg:#3b222b; --ds-radius:14px; --ds-sidebar:clamp(248px,19vw,314px);
   --platform-font:"Onest Variable","Segoe UI",sans-serif; --platform-ink:var(--ds-ink);
   --platform-muted:var(--ds-muted); --platform-violet:var(--ds-accent); --platform-line:var(--ds-line);
   --bg:var(--ds-bg); --panel:var(--ds-surface); --text:var(--ds-ink); --muted:var(--ds-muted);
   --line:var(--ds-line); --border:var(--ds-line); --accent:var(--ds-accent); --green:var(--ds-accent); --tint:var(--ds-accent-soft);
-  font-family:var(--platform-font); color:var(--ds-ink); background:var(--ds-bg); color-scheme:light;
-}
-html[data-theme=dark] {
-  --ds-bg:#101115; --ds-surface:#1a1c22; --ds-soft:#22252e; --ds-ink:#f0f1f5;
-  --ds-muted:#a3a9b9; --ds-line:#343740; --ds-accent:#9498ff; --ds-on-accent:#14152d;
-  --ds-accent-soft:#292940; --ds-accent-hover:#a8abff; --ds-focus:#a8abff;
-  --ds-success:#84d5a8; --ds-success-bg:#18332a; --ds-warning:#edc080; --ds-warning-bg:#392d1e;
-  --ds-danger:#ffa1b0; --ds-danger-bg:#3b222b; color-scheme:dark;
+  font-family:var(--platform-font); color:var(--ds-ink); background:var(--ds-bg); color-scheme:dark;
 }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--ds-bg); color:var(--ds-ink); font-family:var(--platform-font); }
@@ -35,8 +28,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .platform-bar .platform-home { color:var(--ds-ink); gap:10px; width:200px; margin-right:0; flex-shrink:0; }
 .platform-brand-mark { width:32px; height:32px; border-radius:9px; background:var(--ds-accent); color:var(--ds-on-accent); }
 .platform-brand-name { color:var(--ds-ink); font-size:17px; letter-spacing:-.5px; }
-.platform-bar .workspace-picker { flex:0 1 auto; }
-.platform-bar select { max-width:250px; background:var(--ds-bg); color:var(--ds-ink); border:1px solid var(--ds-line); border-radius:8px; padding:9px 12px; min-height:38px; font-size:13px; }
 .platform-header-links { flex:1; min-width:0; gap:14px; justify-content:flex-end; }
 .platform-header-links a { font-size:13px; color:var(--ds-muted); min-height:40px; }
 .platform-header-links .study-header-search { display:flex; align-items:center; gap:10px; text-align:left; background:var(--ds-bg); border:1px solid var(--ds-line); border-radius:8px; color:var(--ds-muted); padding:9px 12px; min-height:38px; max-width:420px; flex:1; font-size:13px; }
@@ -153,7 +144,6 @@ html[data-nav-collapsed=true] .workspace-nav-heading { padding-left:0; justify-c
 html[data-nav-collapsed=true] .workspace-nav :is(button,a) { justify-content:center; }
 html[data-focus=true] .workspace-nav { display:none; }
 html[data-focus=true] { --ds-sidebar:0px; }
-html[data-focus=true] .platform-bar .platform-home,html[data-focus=true] .workspace-picker { display:none; }
 html[data-focus=true] .platform-course :is(.content,.main-shell>main,.linear-page) { max-width:960px; margin-inline:auto; }
 html[data-focus=true] .platform-page { max-width:1000px; margin-inline:auto; }
 @media(max-width:1279px) {
@@ -176,27 +166,25 @@ html[data-focus=true] .platform-page { max-width:1000px; margin-inline:auto; }
 }
 @media(max-width:767px) {
  :root,html[data-nav-collapsed=true] { --ds-sidebar:0px; }
- .platform-bar { height:108px; padding:10px 16px; gap:8px; flex-wrap:wrap; align-content:center; }
+ .platform-bar { height:60px; padding:10px 16px; gap:8px; flex-wrap:wrap; align-content:center; }
  .workspace-mobile { display:inline-flex; }
  .platform-bar .platform-home { width:auto; margin-right:auto; gap:8px; }
  .platform-brand-mark { width:28px; height:28px; }
  .platform-brand-name { color:var(--ds-ink); font-size:15px; }
- .platform-bar .workspace-picker { order:4; display:block; width:100%; flex:0 0 100%; }
- .platform-bar select { width:100%; max-width:none; height:36px; font-size:13px; }
  .platform-header-links { flex:0 1 auto; gap:3px; }
  .platform-header-links .study-header-search { background:transparent; border:0; padding:0; min-width:32px; width:32px; justify-content:center; }
  .platform-header-links>a { display:none; }
  .workspace-icon { width:32px; min-width:32px; height:36px; }
- .sidebar.workspace-nav { top:108px; width:270px; max-width:86vw; transform:translateX(-100%); visibility:hidden; transition:transform .18s,visibility .18s; }
+ .sidebar.workspace-nav { top:60px; width:270px; max-width:86vw; transform:translateX(-100%); visibility:hidden; transition:transform .18s,visibility .18s; }
  html[data-menu=true] .sidebar.workspace-nav { transform:none; visibility:visible; }
  .workspace-collapse { display:none; }
- html[data-menu=true] .workspace-scrim { display:block; position:fixed; inset:108px 0 0; background:#11132266; border:0; z-index:54; }
+ html[data-menu=true] .workspace-scrim { display:block; position:fixed; inset:60px 0 0; background:#11132266; border:0; z-index:54; }
  html[data-nav-collapsed=true] .workspace-nav :is(button,a)>span:not(.workspace-course-symbol),html[data-nav-collapsed=true] :is(.workspace-nav-heading>span,.workspace-nav-group,.workspace-local>span) { display:revert; }
  html[data-nav-collapsed=true] .workspace-nav :is(button,a) { justify-content:flex-start; }
- .platform-course { padding-top:108px; }
+ .platform-course { padding-top:60px; }
  .platform-course .content,.platform-course .main-shell>main,.platform-course .linear-page { margin-left:0; padding:24px 16px; }
  .platform-course .app>main,.platform-course .main-shell { margin-left:0; }
- .platform-page { margin-left:0; padding:132px 16px 0; }
+ .platform-page { margin-left:0; padding:84px 16px 0; }
  .platform-intro-home h1,.platform-course h1 { font-size:28px; letter-spacing:-.8px; }
  .platform-page .platform-lead { font-size:14px; }
  .platform-hero-tags { font-size:12px; gap:12px; }

@@ -27,11 +27,6 @@ body { margin: 0; }
 .platform-brand-name { font-size: 20px; font-weight: 700; letter-spacing: -.8px; }
 .platform-brand-dot { color: var(--ds-accent); }
 .platform-brand-name small { display: block; font-size: 12px; letter-spacing: 2.4px; font-weight: 550; margin-top: 3px; color: var(--ds-muted); }
-.platform-bar label { display: flex; gap: 10px; align-items: center; color: var(--ds-muted); font-size: 12px; }
-.platform-bar select {
-  max-width: 245px; padding: 10px 30px 10px 14px; border: 1px solid var(--ds-line);
-  border-radius: 11px; background: var(--ds-surface); color: var(--ds-muted); font: 12px var(--platform-font); cursor: pointer;
-}
 .platform-header-links { display: flex; align-items: center; gap: 22px; }
 .platform-header-links a { display: flex; align-items: center; gap: 7px; color: var(--ds-muted); font-size: 12px; }
 .platform-header-links a:hover { color: var(--platform-violet); }
@@ -162,8 +157,6 @@ body { margin: 0; }
 }
 @media (max-width: 740px) {
   .platform-bar { gap: 10px; padding: 0 20px; }
-  .platform-bar label { font-size: 0; gap: 0; }
-  .platform-bar select { max-width: 210px; }
   .platform-header-links { gap: 13px; }
   .platform-header-links a { font-size: 0; gap: 0; }
   .platform-brand-name { font-size: 17px; }
@@ -186,8 +179,6 @@ body { margin: 0; }
   .platform-brand-mark > span { font-size: 12px; top: 2px; right: 4px; }
   .platform-brand-name { font-size: 17px; display: flex; align-items: baseline; }
   .platform-brand-name small { margin-left: 14px; font-size: 12px; letter-spacing: 1.6px; }
-  .platform-bar label { margin-right: auto; min-width: 0; }
-  .platform-bar select { padding: 7px 9px; font-size: 12px; max-width: 218px; border-radius: 7px; }
   .platform-header-links { gap: 16px; margin-right: 3px; }
   .platform-header-links svg { width: 17px; height: 17px; }
   .platform-course { padding-top: 106px; }

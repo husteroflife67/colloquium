@@ -138,8 +138,6 @@
   .study-journal-cta { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 560px) {
-  .platform-bar label { flex: 1; min-width: 0; }
-  .platform-bar select { width: 100%; min-width: 0; }
   .platform-header-links { gap: 14px; }
   .study-home-search { padding: 12px; gap: 9px; }
   .study-home-search > span { font-size: 12px; }

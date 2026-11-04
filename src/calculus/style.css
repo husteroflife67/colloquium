@@ -17,7 +17,7 @@
   --accent: var(--ds-accent);
   --tint: var(--ds-accent-soft);
   --sidebar: var(--ds-surface);
-  color-scheme: light;
+  color-scheme: dark;
 }
 * {
   box-sizing: border-box;

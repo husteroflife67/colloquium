@@ -1,3 +1,4 @@
+import { switchCourse } from "./course-navigation";
 import { test, expect } from "@playwright/test";
 
 test("new navigation and course views fit phones and tablets without horizontal scrolling", async ({ page }) => {
@@ -7,12 +8,9 @@ test("new navigation and course views fit phones and tablets without horizontal 
     await expect(page.getByRole("heading", { name: "Продолжить подготовку" })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    const picker = page.getByLabel("Выбрать курс");
-    const box = await picker.boundingBox();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+    await expect(page.locator(".platform-bar select")).toHaveCount(0);
     for (const course of ["discrete", "calculus"]) {
-      await picker.selectOption(course);
+      await switchCourse(page, course);
       await expect(page.locator(".sidebar")).toBeAttached();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
@@ -30,7 +28,7 @@ test("reduced motion stops decorative and interface animations, and the font is 
   await page.evaluate(() => document.fonts.ready);
   expect(fonts.some(url => url.includes("onest-cyrillic"))).toBe(true);
   expect(fonts.every(url => new URL(url).hostname === "127.0.0.1")).toBe(true);
-  await page.getByLabel("Выбрать курс").selectOption("calculus");
+  await switchCourse(page, "calculus");
   await expect(page.locator(".sidebar")).toBeVisible();
   expect(await page.locator(".main-shell > main").evaluate(el => getComputedStyle(el).animationName)).toBe("none");
 });

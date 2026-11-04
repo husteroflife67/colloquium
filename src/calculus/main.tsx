@@ -1,5 +1,4 @@
-import { CourseOverview } from "../platform/CourseOverview";
-import { lastMaterial } from "../platform/workspace-preferences";
+import { CalculusDashboard } from "./CalculusDashboard";
 import { rememberMaterial } from "../platform/workspace-preferences";
 import { MaterialActions } from "../platform/MaterialActions";
 import { oralTargets } from "../platform/study-content";
@@ -8,7 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MathText } from "./MathText";
 import { LearningToday } from "./LearningToday";
 import { OralExaminer } from "./OralExaminer";
-import { scheduleReview, dueItems } from "./repetition";
+import { scheduleReview } from "./repetition";
 import {
   BookOpen,
   LayoutDashboard,
@@ -107,11 +106,7 @@ export default function CalculusApp() {
       /* main export remains available */
     }
   }, [questionRatings]);
-  const [data, setData] = useState<Data>(() => {
-    const value = load();
-    try { const preference = localStorage.getItem("colloquium-ui-theme"); if (preference === "light" || preference === "dark") return { ...value, theme: preference }; } catch { /* Preserve the course theme. */ }
-    return value;
-  });
+  const [data, setData] = useState<Data>(load);
   const previousData = useRef<Data | undefined>(undefined);
   useProgressReload(KEY, load, value => setData(old => JSON.stringify(old) === JSON.stringify(value) ? old : value));
   useProgressReload(KEY + "-questions", loadQuestions, value => setQuestionRatings(old => JSON.stringify(old) === JSON.stringify(value) ? old : value));
@@ -134,13 +129,7 @@ export default function CalculusApp() {
         "Не удалось сохранить данные: хранилище заполнено или недоступно. Экспортируйте JSON.",
       );
     }
-    document.documentElement.dataset.theme = data.theme;
   }, [data]);
-  useEffect(() => {
-    const update = (event: Event) => setData(d => ({ ...d, theme: (event as CustomEvent<"light" | "dark">).detail }));
-    window.addEventListener("workspace-theme", update);
-    return () => window.removeEventListener("workspace-theme", update);
-  }, []);
   const rate = (id: string, r: Rating) =>
     setData((d) => ({
       ...d,
@@ -161,11 +150,6 @@ export default function CalculusApp() {
     window.addEventListener("workspace-navigate", update);
     return () => window.removeEventListener("workspace-navigate", update);
   });
-  const mastered = items.filter((i) => data.ratings[i.id] === "known").length;
-  const percent = Math.round((mastered / items.length) * 100);
-  const weak = items.filter(
-    (i) => data.ratings[i.id] === "repeat" || data.ratings[i.id] === "unknown",
-  );
   const topicStatus = (id: number) =>
     items
       .filter((i) => i.topic === id)
@@ -291,21 +275,9 @@ export default function CalculusApp() {
               </button>
             </div>
           )}
-          {page === "dashboard" && <CourseOverview title="Математический анализ" context="Коллоквиум I · твоя подготовка" symbol="∫" value={mastered} total={items.length} progressLabel="Самооценка «Знаю»"
-            metrics={[
-              { label: "Определения", value: `${items.filter(i => i.definitionNumber !== undefined && data.ratings[i.id] === "known").length} / ${items.filter(i => i.definitionNumber !== undefined).length}`, icon: BookOpen, action: () => navigate("definition") },
-              { label: "К повторению", value: dueItems(items, data.schedules ?? {}, Date.now()).filter(i => data.schedules?.[i.id]).length, icon: RotateCcw, action: () => navigate("today") },
-              { label: "Пробных билетов", value: data.history.length, icon: Layers, action: () => navigate("history") },
-              { label: "Доказательства", value: `${items.filter(i => i.kind === "theory" && i.required && data.ratings[i.id] === "known").length} / ${items.filter(i => i.kind === "theory" && i.required).length}`, icon: GraduationCap, action: () => navigate("theory") },
-            ]}
-            today={[
-              { title: "Повторить материалы", subtitle: `${dueItems(items, data.schedules ?? {}, Date.now()).filter(i => data.schedules?.[i.id]).length} назначенных повторений`, icon: RotateCcw, action: () => navigate("today") },
-              { title: "Пройти пробный билет", subtitle: "Проверка знаний и устный ответ", action: () => navigate("simulation") },
-            ]}
-            next={{ title: "Продолжить обучение", subtitle: lastMaterial("calculus")?.title ?? (items.find(i => data.ratings[i.id] !== "known") ?? items[0]).title, action: () => { const last = lastMaterial("calculus"); const next = items.find(i => i.id === last?.id) ?? items.find(i => data.ratings[i.id] !== "known") ?? items[0]; open(next); } }}
-            topics={topics.map(t => { const related = items.filter(i => i.topic === t.id); return { title: t.title, total: related.length, value: related.filter(i => data.ratings[i.id] === "known").length, action: () => { navigate("plan"); setTopic(t.id); } }; })} onTopics={() => navigate("plan")}>
-            <span>Практика: <b>{items.filter(i => i.kind === "practice" && data.ratings[i.id] === "known").length} / {items.filter(i => i.kind === "practice").length}</b></span><span>Уточнения: <b>{Object.values(questionRatings).filter(r => r === "known").length} / {questionIds.size}</b></span><button onClick={() => { navigate("theory"); setFilter("weak"); }}>Вернуться к сложному · {weak.length}</button><a href={`${import.meta.env.BASE_URL}sources/program.pdf`} target="_blank" rel="noreferrer">Программа курса ↗</a><a href={`${import.meta.env.BASE_URL}sources/notes.pdf`} target="_blank" rel="noreferrer">Конспект лекций ↗</a>
-          </CourseOverview>}
+          {page === "dashboard" && <CalculusDashboard data={data} questionRatings={questionRatings} questionCount={questionIds.size}
+            navigate={navigate} open={open} openTopic={id => { navigate("plan"); setTopic(id); }}
+            openWeak={() => { navigate("theory"); setFilter("weak"); }} />}
           {page === "plan" && (
             <>
               <div className="info-strip">

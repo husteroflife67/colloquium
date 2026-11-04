@@ -9,10 +9,10 @@ for (const theme of ["light", "dark"]) test(`all workspace routes fit every requ
     for (const route of routes) {
       await page.goto(`/#/${route}`);
       await expect(page.locator(".platform-bar")).toBeVisible();
-      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} at ${width}px (${theme})`).toBe(true);
-      const picker = await page.getByLabel("Выбрать курс").boundingBox();
-      expect(picker!.x + picker!.width, `${route} course picker at ${width}`).toBeLessThanOrEqual(width);
+      await expect(page.locator(".platform-bar select")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /^(Светлая|Тёмная) тема$/ })).toHaveCount(0);
     }
   }
   expect(errors).toEqual([]);
@@ -50,4 +50,32 @@ test("mobile navigation contains focus and returns it; resume tracks viewing wit
   expect(await page.evaluate(() => localStorage.getItem("discrete-study-v1"))).toEqual(saved);
   await page.getByRole("button", { name: "Открыть меню" }).click();
   await page.keyboard.press("Escape"); await expect(page.getByRole("button", { name: "Открыть меню" })).toBeFocused();
+});
+
+test("calculus start, mastery, scheduled review and resuming use the same real material", async ({ page }) => {
+  await page.goto("/#/calculus/dashboard");
+  const dashboard = page.locator(".calc-dashboard");
+  await expect(dashboard.getByRole("heading", { name: "С чего начать?" })).toBeVisible();
+  await expect(dashboard.locator(".calc-percent")).toContainText("0%");
+  const first = await dashboard.locator(".calc-hero p").innerText();
+  await dashboard.getByRole("button", { name: "Начать обучение" }).click();
+  await expect(page.locator(".reading")).toContainText(first);
+  await page.getByRole("button", { name: "Знаю", exact: true }).click();
+  await page.clock.setFixedTime(new Date(Date.now() + 25 * 60 * 60 * 1000));
+  await page.goto("/#/calculus/dashboard");
+  await expect(dashboard.locator(".calc-percent")).toContainText("1%");
+  await expect(dashboard.locator(".calc-stat").first()).toContainText("1 / 43");
+  await expect(dashboard.locator(".calc-task").first()).toContainText("К повторению по расписанию: 1");
+  await dashboard.getByRole("button", { name: "Продолжить", exact: true }).click();
+  await expect(page.locator(".reading")).toContainText(first);
+});
+
+test("first paint uses dark native controls even before JavaScript in a light system", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, colorScheme: "light" });
+  const page = await context.newPage();
+  await page.goto(baseURL!);
+  const root = page.locator("html");
+  await expect(root).toHaveCSS("color-scheme", "dark");
+  await expect(root).toHaveCSS("background-color", "rgb(13, 15, 20)");
+  await context.close();
 });

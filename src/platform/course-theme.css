@@ -80,7 +80,7 @@
  .platform-course :is(.reading p,.reading li,.answer p,.proof li,.linear-math) { font-size:15px; }
  .platform-course :is(.statement,.official-prompt) { padding:16px; }
  .platform-course .linear-heading h1 { font-size:28px; }
- .platform-course .linear-toolbar { top:108px; }
+ .platform-course .linear-toolbar { top:60px; }
  .platform-course :is(.stats,.stats-row,.linear-stats) { grid-template-columns:repeat(2,minmax(0,1fr)); }
  .platform-course .linear-stats>div:last-child { grid-column:1/-1; }
  .platform-course .linear-search,.platform-course .linear-difficulty-filter { min-width:0; max-width:100%; }

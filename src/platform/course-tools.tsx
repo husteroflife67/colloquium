@@ -1,6 +1,6 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { courses, materialKey, type CourseId, type Material } from "./catalog";
-import { Bookmark as BookmarkIcon, NotebookPen, Search, GraduationCap, Home, BookOpen, RotateCcw, Map, Timer, History, Settings, Cloud, Layers, MessageCircle, PenLine, PanelLeftClose, PanelLeftOpen, Menu, X, Sun, Moon, Maximize2, Minimize2 } from "lucide-react";
+import { Bookmark as BookmarkIcon, NotebookPen, Search, GraduationCap, Home, BookOpen, RotateCcw, Map, Timer, History, Settings, Cloud, Layers, MessageCircle, PenLine, PanelLeftClose, PanelLeftOpen, Menu, X, LayoutGrid, Maximize2, Minimize2 } from "lucide-react";
 import { platformKey, readPlatform } from "./platform-state";
 export { platformKey, readPlatform } from "./platform-state";
 export type { PlatformSaved } from "./platform-state";
@@ -29,7 +29,7 @@ export function useCoursePage<T extends string>(course: CourseId, initial: T, al
   return [page, navigate];
 }
 export const workspaceSections = {
-  calculus: [["dashboard", "Обзор", Home], ["plan", "Тематический план", Map], ["today", "На сегодня", RotateCcw], ["definition", "Определения", Layers], ["theory", "Теория и доказательства", BookOpen], ["questions", "Вопросы принимающего", MessageCircle], ["oral", "Устный экзаменатор", MessageCircle], ["practice", "Практика", PenLine], ["simulation", "Пробный коллоквиум", Timer], ["history", "История", History], ["sync", "Синхронизация", Cloud], ["settings", "Настройки", Settings]],
+  calculus: [["dashboard", "Обзор", LayoutGrid], ["plan", "Тематический план", Map], ["today", "На сегодня", RotateCcw], ["definition", "Определения", Layers], ["theory", "Теория и доказательства", BookOpen], ["questions", "Вопросы принимающего", MessageCircle], ["oral", "Устный экзаменатор", MessageCircle], ["practice", "Практика", PenLine], ["simulation", "Пробный коллоквиум", Timer], ["history", "История", History], ["sync", "Синхронизация", Cloud], ["settings", "Настройки", Settings]],
   discrete: [["course", "Темы и вопросы", BookOpen], ["review", "Повторение", RotateCcw], ["plan", "План подготовки", Map], ["proofs", "Доказательства", GraduationCap], ["ticket", "Пробный билет", Timer], ["progress", "Мой прогресс", History], ["sync", "Синхронизация", Cloud]],
   linear: [["study", "Обзор", BookOpen], ["exam", "Контрольная", Timer]],
 } as const;
@@ -44,16 +44,13 @@ export function CourseTools({ course }: { course?: CourseId }) {
   const [menu, setMenu] = useState(false);
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem("colloquium-ui-sidebar") === "collapsed"; } catch { return false; } });
   const [focused, setFocused] = useState(document.documentElement.dataset.focus === "true");
-  const [dark, setDark] = useState(document.documentElement.dataset.theme === "dark");
   useEffect(() => {
     const update = () => { setHash(location.hash); setMenu(false); };
     const focus = () => setFocused(document.documentElement.dataset.focus === "true");
-    const observer = new MutationObserver(() => setDark(document.documentElement.dataset.theme === "dark"));
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     window.addEventListener("hashchange", update); window.addEventListener("workspace-focus", focus);
     const escape = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
     window.addEventListener("keydown", escape);
-    return () => { observer.disconnect(); window.removeEventListener("hashchange", update); window.removeEventListener("workspace-focus", focus); window.removeEventListener("keydown", escape); };
+    return () => { window.removeEventListener("hashchange", update); window.removeEventListener("workspace-focus", focus); window.removeEventListener("keydown", escape); };
   }, []);
   useEffect(() => { document.documentElement.dataset.navCollapsed = String(collapsed); try { localStorage.setItem("colloquium-ui-sidebar", collapsed ? "collapsed" : "expanded"); } catch { /* Session preference still works. */ } }, [collapsed]);
   useEffect(() => { document.documentElement.dataset.menu = String(menu); return () => { delete document.documentElement.dataset.menu; }; }, [menu]);
@@ -61,7 +58,7 @@ export function CourseTools({ course }: { course?: CourseId }) {
     if (!menu) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    document.querySelector<HTMLButtonElement>('#workspace-nav button')?.focus();
+    document.querySelector<HTMLButtonElement>('#workspace-nav nav button')?.focus();
     const trap = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
       const targets = [...document.querySelectorAll<HTMLElement>('#workspace-nav a, #workspace-nav button, .workspace-mobile')].filter(element => element.getClientRects().length && getComputedStyle(element).visibility !== "hidden");
@@ -72,31 +69,32 @@ export function CourseTools({ course }: { course?: CourseId }) {
     window.addEventListener("keydown", trap);
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", trap); document.querySelector<HTMLButtonElement>('.workspace-mobile')?.focus(); };
   }, [menu]);
-  function theme() {
-    const next = dark ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try { localStorage.setItem("colloquium-ui-theme", next); } catch { /* Theme remains available for this session. */ }
-    window.dispatchEvent(new CustomEvent("workspace-theme", { detail: next }));
-  }
   const section = hash.slice(2).split("?")[0].split("/")[1];
+  const utilityRoutes = ["history", "sync", "settings"];
+  function sectionButtons(utilities: boolean) {
+    if (!course) return null;
+    return workspaceSections[course].filter(([route]) => utilityRoutes.includes(route) === utilities)
+      .map(([route, label, Icon]) => <button key={route} title={label} aria-current={section === route ? "page" : undefined}
+        className={section === route ? "active" : ""} onClick={() => { setMenu(false); navigateWorkspace(course, route); }}>
+        <Icon size={18} /><span>{label}</span>
+      </button>);
+  }
   return <>
     <a className="workspace-skip" href="#workspace-content" onClick={e => { e.preventDefault(); const content = document.querySelector<HTMLElement>('main'); if (content) { content.tabIndex = -1; content.focus(); } }}>К содержимому</a>
-    <header className="platform-bar" aria-label="Выбор курса">
+    <header className="platform-bar" aria-label="Панель платформы">
       <button className="workspace-mobile workspace-icon" aria-label={course === "discrete" ? "Открыть меню" : "Меню"} aria-expanded={menu} aria-controls="workspace-nav" onClick={() => setMenu(!menu)}>{menu ? <X size={20} /> : <Menu size={20} />}</button>
       <a className="platform-home" href="#/home"><span className="platform-brand-mark" aria-hidden="true"><GraduationCap size={22} /></span><span className="platform-brand-name">Коллоквиум</span></a>
-      <label className="workspace-picker"><span className="sr-only">Курс</span><select aria-label="Выбрать курс" value={course ?? ""} onChange={e => { const id = e.target.value as CourseId; location.hash = `#/${id}/${courses[id].start}`; }}>
-        {!course && <option value="" disabled>Все курсы</option>}{Object.entries(courses).map(([id, c]) => <option key={id} value={id}>{c.title}</option>)}
-      </select></label>
-      <div className="platform-header-links"><button className="study-header-search" onClick={openCommands} aria-label="Поиск по всем курсам"><Search size={17} /><span>Поиск материалов и действий</span><kbd>⌘ K / Ctrl K</kbd></button><a href="#/bookmarks" aria-label="Закладки" title="Закладки"><BookmarkIcon size={18} /><span className="workspace-link-label">Закладки</span></a><button className="workspace-icon" aria-label={dark ? "Светлая тема" : "Тёмная тема"} title={dark ? "Светлая тема" : "Тёмная тема"} onClick={theme}>{dark ? <Sun size={19} /> : <Moon size={19} />}</button><button className="workspace-icon" aria-label={focused ? "Выйти из Focus Mode" : "Focus Mode"} aria-pressed={focused} title="Focus Mode · Alt+F" onClick={toggleFocus}>{focused ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button></div>
+      <div className="platform-header-links"><button className="study-header-search" onClick={openCommands} aria-label="Поиск по всем курсам"><Search size={17} /><span>Поиск материалов и действий</span><kbd>⌘ K / Ctrl K</kbd></button><a href="#/bookmarks" aria-label="Закладки" title="Закладки"><BookmarkIcon size={18} /><span className="workspace-link-label">Закладки</span></a><button className="workspace-icon" aria-label={focused ? "Выйти из Focus Mode" : "Focus Mode"} aria-pressed={focused} title="Focus Mode · Alt+F" onClick={toggleFocus}>{focused ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button></div>
     </header>
     {menu && <button className="workspace-scrim" aria-label="Закрыть меню" onClick={() => setMenu(false)} />}
     <aside id="workspace-nav" className="sidebar workspace-nav" aria-label="Навигация">
-      <div className="workspace-nav-heading"><span>Рабочее пространство</span><button className="workspace-icon workspace-collapse" aria-label={collapsed ? "Развернуть панель" : "Свернуть панель"} onClick={() => setCollapsed(!collapsed)}>{collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button></div>
+      <div className="workspace-nav-heading"><span>Навигация</span><button className="workspace-icon workspace-collapse" aria-label={collapsed ? "Развернуть панель" : "Свернуть панель"} onClick={() => setCollapsed(!collapsed)}>{collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button></div>
       <nav aria-label="Разделы"><button title="Главная" className={!course && (!hash || hash === "#/home") ? "active" : ""} onClick={() => { location.hash = "#/home"; }}><Home size={18} /><span>Главная</span></button>
-        {course && <><p className="workspace-nav-group">{courses[course].title}</p>{workspaceSections[course].map(([route, label, Icon], i) => <button key={route} title={label} aria-current={section === route ? "page" : undefined} className={section === route ? "active" : ""} data-group={i > 0 && ["simulation", "ticket", "exam", "history", "sync"].includes(route) ? "start" : undefined} onClick={() => navigateWorkspace(course, route)}><Icon size={18} /><span>{label}</span></button>)}</>}
+        {course && <><p className="workspace-nav-group current-course"><Layers size={18} />{courses[course].title}</p>{sectionButtons(false)}</>}
       </nav>
-      <nav className="workspace-courses" aria-label="Курсы"><p className="workspace-nav-group">Курсы</p>{Object.entries(courses).map(([id,c]) => <a key={id} title={c.title} aria-current={course === id ? "true" : undefined} className={course === id ? "active" : ""} href={`#/${id}/${c.start}`} onClick={e => { e.preventDefault(); navigateWorkspace(id as CourseId, c.start); }}><span className="workspace-course-symbol" aria-hidden="true">{id === "calculus" ? "∫" : id === "discrete" ? "⋈" : "⊞"}</span><span>{c.title}</span></a>)}</nav>
-      <div className="workspace-nav-bottom">{course === "discrete" && <SyncBadge onOpen={() => navigateWorkspace("discrete", "sync")} />}<button onClick={toggleDensity} title="Переключить плотность"><Layers size={18} /><span>Плотность интерфейса</span></button><a href="#/mistakes" aria-label="Журнал ошибок"><NotebookPen size={18} /><span>Журнал ошибок</span></a><a aria-label="Данные и настройки" href={course === "calculus" ? "#/calculus/settings" : "#/home"} onClick={e => { if (course !== "calculus") { e.preventDefault(); location.hash = "#/home"; setTimeout(() => document.getElementById("backup")?.scrollIntoView(), 100); } }}><Settings size={18} /><span>Данные и настройки</span></a><span className="workspace-local"><i /><span>Прогресс на устройстве</span></span></div>
+      <nav className="workspace-courses" aria-label="Курсы"><p className="workspace-nav-group">{course ? "Другие курсы" : "Курсы"}</p>{Object.entries(courses).filter(([id]) => id !== course).map(([id,c]) => <a key={id} title={c.title} href={`#/${id}/${c.start}`} onClick={e => { e.preventDefault(); navigateWorkspace(id as CourseId, c.start); }}><span className="workspace-course-symbol" aria-hidden="true">{id === "calculus" ? "∫" : id === "discrete" ? "⋈" : "⊞"}</span><span>{c.title}</span></a>)}</nav>
+      {course && <nav className="workspace-utilities" aria-label="Сервисные разделы">{sectionButtons(true)}</nav>}
+      <div className="workspace-nav-bottom">{course === "discrete" && <SyncBadge onOpen={() => navigateWorkspace("discrete", "sync")} />}<button onClick={toggleDensity} title="Переключить плотность"><Layers size={18} /><span>Плотность интерфейса</span></button><a href="#/mistakes" aria-label="Журнал ошибок"><NotebookPen size={18} /><span>Журнал ошибок</span></a>{course !== "calculus" && <a aria-label="Данные и настройки" href="#/home" onClick={e => { e.preventDefault(); location.hash = "#/home"; setTimeout(() => document.getElementById("backup")?.scrollIntoView(), 100); }}><Settings size={18} /><span>Данные и настройки</span></a>}<span className="workspace-local"><i /><span>Прогресс на устройстве</span></span></div>
     </aside>
     <nav className="workspace-mobile-tabs" aria-label="Быстрые переходы">
       <a href="#/home" aria-label="На главную" aria-current={!course ? "page" : undefined}><Home size={20} /><span>Главная</span></a>

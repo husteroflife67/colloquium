@@ -157,7 +157,7 @@ test("mobile reading and dark theme fit viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/#/calculus/dashboard");
   await page.getByRole("button", { name: "Меню", exact: true }).click();
-  await page.getByRole("button", { name: "Тёмная тема", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Тёмная тема", exact: true })).toHaveCount(0);
   await page
     .getByRole("button", { name: "Теория и доказательства", exact: true })
     .click();
