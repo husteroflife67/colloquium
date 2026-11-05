@@ -17,4 +17,5 @@ export function toggleDensity() {
   const density = document.documentElement.dataset.density === "compact" ? "comfortable" : "compact";
   document.documentElement.dataset.density = density;
   try { localStorage.setItem("colloquium-ui-density", density); } catch { /* Session preference still works. */ }
+  window.dispatchEvent(new Event("workspace-density"));
 }

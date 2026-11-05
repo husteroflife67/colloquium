@@ -43,6 +43,7 @@ export function CommandPanel() {
   const actions: Entry[] = [
     { id: "home", title: "Главная · все курсы", detail: "Навигация", href: "#/home" },
     { id: "bookmarks", title: "Закладки", detail: "Навигация", href: "#/bookmarks" },
+    { id: "settings", title: "Настройки платформы", detail: "Данные и резервные копии", href: "#/settings" },
     { id: "journal", title: "Журнал ошибок", detail: "Навигация", href: "#/mistakes" },
     { id: "density", title: "Переключить плотность интерфейса", detail: "Комфортная / компактная", action: toggleDensity },
     { id: "focus", title: "Переключить Focus Mode", detail: "Действие · Alt+F", action: toggleFocus },

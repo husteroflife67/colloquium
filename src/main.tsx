@@ -27,7 +27,7 @@ function Platform() {
   useEffect(() => { rememberMaterial(hash); }, [hash]);
   const route = hash.split("?")[0];
   const course = hash.startsWith("#/calculus/") ? "calculus" : hash.startsWith("#/discrete/") ? "discrete" : hash.startsWith("#/linear/") ? "linear" : null;
-  const view = hash === "#/bookmarks" ? "bookmarks" : hash === "#/mistakes" ? "mistakes" : "home";
+  const view = hash === "#/bookmarks" ? "bookmarks" : hash === "#/mistakes" ? "mistakes" : route === "#/settings" ? "settings" : "home";
   useEffect(() => { document.title = course === "calculus" ? "Коллоквиум · Математический анализ" : course === "discrete" ? "Коллоквиум · Дискретная математика" : course === "linear" ? "Коллоквиум · Линейная алгебра" : "Коллоквиум · три курса"; }, [course]);
   return <><CommandPanel /><Suspense fallback={<p className="platform-page" role="status">Загружаем курс…</p>}>
     {course ? <div className={`platform-course platform-course-${course}`} key={course}>{course === "calculus" ? <Calculus /> : course === "linear" ? <Linear /> : <Discrete />}</div> : route === "#/search" ? <SearchPage /> : route === "#/recovery" ? <Recovery /> : <Home key={hash} view={view} />}

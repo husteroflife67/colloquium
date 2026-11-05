@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-const routes = ["home", "search", "bookmarks", "mistakes", "recovery", ...["dashboard", "plan", "today", "definition", "theory", "questions", "oral", "practice", "simulation", "history", "sync", "settings"].map(p => `calculus/${p}`), ...["course", "review", "plan", "proofs", "ticket", "progress", "sync"].map(p => `discrete/${p}`), "linear/study", "linear/study?topic=1&tab=solutions", "linear/exam"];
+const routes = ["home", "settings", "search", "bookmarks", "mistakes", "recovery", ...["dashboard", "plan", "today", "definition", "theory", "questions", "oral", "practice", "simulation", "history", "sync", "settings"].map(p => `calculus/${p}`), ...["course", "review", "plan", "proofs", "ticket", "progress", "sync"].map(p => `discrete/${p}`), "linear/study", "linear/study?topic=1&tab=solutions", "linear/exam"];
 for (const theme of ["light", "dark"]) test(`all workspace routes fit every required viewport · ${theme}`, async ({ page }) => {
   test.setTimeout(180_000);
   const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
@@ -111,4 +111,75 @@ test("command dialog keeps keyboard focus when opened over the mobile drawer", a
   await page.keyboard.press("Escape");
   await expect(menu).toHaveAttribute("aria-expanded", "false");
   await expect(menu).toBeFocused();
+});
+
+test("mobile menu and focus mode never leave an invisible drawer blocking the page", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#/calculus/definition?item=def-completeness");
+  await page.getByRole("button", { name: "Focus Mode", exact: true }).click();
+  const menu = page.getByRole("button", { name: "Меню", exact: true });
+  await menu.click();
+  await expect(page.locator("html")).toHaveAttribute("data-focus", "false");
+  await expect(page.locator(".workspace-nav")).toBeVisible();
+  await page.getByRole("button", { name: "Focus Mode", exact: true }).click();
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator(".workspace-scrim")).toHaveCount(0);
+  await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+  await expect(page.locator(".reading")).toBeVisible();
+});
+
+test("mobile materials tab returns from a card to the course list", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#/calculus/definition?item=def-completeness");
+  await expect(page.locator(".reading")).toBeVisible();
+  await page.getByRole("link", { name: "К материалам", exact: true }).click();
+  await expect(page.locator(".reading")).toHaveCount(0);
+  await expect(page.locator(".library-card").first()).toBeVisible();
+  await page.goto("/#/discrete/course?item=1");
+  await expect(page.locator("#draft")).toBeVisible();
+  await page.getByRole("link", { name: "К материалам", exact: true }).click();
+  await expect(page.locator("#draft")).toHaveCount(0);
+  await expect(page.locator(".course-overview")).toBeVisible();
+});
+
+
+test("settings links open backup controls from search on desktop and mobile", async ({ page }) => {
+  await page.goto("/#/search");
+  await page.getByRole("link", { name: "Данные и настройки", exact: true }).click();
+  await expect(page).toHaveURL(/#\/settings$/);
+  await expect(page.getByRole("heading", { name: "Настройки", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Экспорт всех курсов" })).toBeVisible();
+  await expect(page.getByLabel("Импорт прогресса платформы")).toBeAttached();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#/search");
+  await page.getByRole("link", { name: "К настройкам", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Настройки", exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Экспорт всех курсов" })).toBeVisible();
+});
+
+test("bottom tabs highlight the open section and compact density changes real spacing", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#/home");
+  const tabs = page.getByRole("navigation", { name: "Быстрые переходы" });
+  await expect(tabs.getByRole("link", { name: "На главную" })).toHaveAttribute("aria-current", "page");
+  await tabs.getByRole("link", { name: "К материалам" }).click();
+  await expect(tabs.getByRole("link", { name: "К материалам" })).toHaveAttribute("aria-current", "page");
+  await expect(tabs.locator('[aria-current="page"]')).toHaveCount(1);
+  await tabs.getByRole("link", { name: "К настройкам" }).click();
+  await expect(tabs.getByRole("link", { name: "К настройкам" })).toHaveAttribute("aria-current", "page");
+  await expect(tabs.locator('[aria-current="page"]')).toHaveCount(1);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#/calculus/dashboard");
+  const panel = page.locator(".calc-panel").first();
+  const comfortable = await panel.evaluate(el => getComputedStyle(el).paddingTop);
+  const density = page.getByRole("button", { name: "Плотность интерфейса", exact: true });
+  await density.click();
+  await expect(density).toHaveAttribute("aria-pressed", "true");
+  await expect(density).toContainText("Компактная");
+  expect(await panel.evaluate(el => parseFloat(getComputedStyle(el).paddingTop))).toBeLessThan(parseFloat(comfortable));
+  await page.reload();
+  await expect(density).toHaveAttribute("aria-pressed", "true");
+  await density.click();
+  await expect(panel).toHaveCSS("padding-top", comfortable);
 });

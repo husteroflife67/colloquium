@@ -238,3 +238,21 @@
  .platform-course .linear-exam-heading h1 { font-size:25px; }
  .platform-course .linear-page:has(.linear-exam-task)>.linear-topics button { font-size:12px; min-height:36px; }
 }
+.workspace-nav-bottom button small { display:block; font-size:11px; margin-top:2px; color:var(--ds-muted); font-weight:400; }
+.workspace-nav-bottom button[aria-pressed=true] { color:var(--ds-accent); }
+html[data-density=compact] .platform-course :is(.content,.main-shell>main,.linear-page) { padding:20px; }
+html[data-density=compact] .platform-page { padding:88px 24px 0; }
+html[data-density=compact] :is(.platform-card,.platform-section,.calc-panel,.unified-next,.calc-hero) { padding:16px; }
+html[data-density=compact] .platform-course :is(.library-card,.topic-card,.material-card,.practice-card,.linear-task-head,.linear-exam-task,.reading,.detail-card,.linear-theory) { padding:16px; }
+html[data-density=compact] .platform-course :is(.calc-heading,.page-heading) { margin-bottom:16px; }
+html[data-density=compact] :is(.calc-columns,.platform-courses,.library-grid,.topic-grid,.linear-topic-grid) { gap:12px; }
+html[data-density=compact] .calc-columns { margin-top:16px; }
+html[data-density=compact] :is(.calc-panel .calc-task,.calc-panel .calc-stat) { min-height:44px; padding-block:8px; }
+html[data-density=compact] .platform-page .platform-card-stats { padding-block:12px; }
+html[data-density=compact] .platform-page .platform-meter { margin-block:12px; }
+html[data-density=compact] .platform-page .study-result { padding-block:14px; }
+html[data-density=compact] .platform-course :is(.question-row,.plan-item) { padding-block:8px; min-height:44px; }
+@media(max-width:767px) {
+ html[data-density=compact] .platform-course :is(.content,.main-shell>main,.linear-page) { padding:16px 12px 88px; }
+ html[data-density=compact] .platform-page { padding:80px 12px 88px; }
+}

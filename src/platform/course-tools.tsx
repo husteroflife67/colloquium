@@ -43,14 +43,21 @@ export function CourseTools({ course }: { course?: CourseId }) {
   const [hash, setHash] = useState(location.hash);
   const [menu, setMenu] = useState(false);
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem("colloquium-ui-sidebar") === "collapsed"; } catch { return false; } });
+  const [compact, setCompact] = useState(document.documentElement.dataset.density === "compact");
   const [focused, setFocused] = useState(document.documentElement.dataset.focus === "true");
   useEffect(() => {
     const update = () => { setHash(location.hash); setMenu(false); };
-    const focus = () => setFocused(document.documentElement.dataset.focus === "true");
+    const focus = () => {
+      const active = document.documentElement.dataset.focus === "true";
+      setFocused(active);
+      if (active) setMenu(false);
+    };
+    const density = () => setCompact(document.documentElement.dataset.density === "compact");
+    window.addEventListener("workspace-density", density);
     window.addEventListener("hashchange", update); window.addEventListener("workspace-focus", focus);
     const escape = (e: KeyboardEvent) => { if (e.key === "Escape" && !document.querySelector("dialog[open]")) setMenu(false); };
     window.addEventListener("keydown", escape);
-    return () => { window.removeEventListener("hashchange", update); window.removeEventListener("workspace-focus", focus); window.removeEventListener("keydown", escape); };
+    return () => { window.removeEventListener("workspace-density", density); window.removeEventListener("hashchange", update); window.removeEventListener("workspace-focus", focus); window.removeEventListener("keydown", escape); };
   }, []);
   useEffect(() => { document.documentElement.dataset.navCollapsed = String(collapsed); try { localStorage.setItem("colloquium-ui-sidebar", collapsed ? "collapsed" : "expanded"); } catch { /* Session preference still works. */ } }, [collapsed]);
   useEffect(() => { document.documentElement.dataset.menu = String(menu); return () => { delete document.documentElement.dataset.menu; }; }, [menu]);
@@ -69,7 +76,14 @@ export function CourseTools({ course }: { course?: CourseId }) {
     window.addEventListener("keydown", trap);
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", trap); document.querySelector<HTMLButtonElement>('.workspace-mobile')?.focus(); };
   }, [menu]);
+  const materialRoute = course === "calculus" ? "definition" : course === "discrete" ? "course" : "study";
+  const examRoute = course === "calculus" ? "simulation" : course === "discrete" ? "ticket" : "exam";
   const section = hash.slice(2).split("?")[0].split("/")[1];
+  const route = hash.split("?")[0];
+  const overview = course === "calculus" ? section === "dashboard" : !course && (!hash || route === "#/home");
+  const settings = route === "#/settings" || route === "#/calculus/settings";
+  const checking = course ? ["simulation", "oral", "ticket", "exam"].includes(section) : route === "#/bookmarks";
+  const reading = course ? !overview && ["study", "course", "plan", "today", "definition", "theory", "questions", "practice", "proofs", "review"].includes(section) : route === "#/search";
   const utilityRoutes = ["history", "sync", "settings"];
   function sectionButtons(utilities: boolean) {
     if (!course) return null;
@@ -82,7 +96,7 @@ export function CourseTools({ course }: { course?: CourseId }) {
   return <>
     <a className="workspace-skip" href="#workspace-content" onClick={e => { e.preventDefault(); const content = document.querySelector<HTMLElement>('main'); if (content) { content.tabIndex = -1; content.focus(); } }}>К содержимому</a>
     <header className="platform-bar" aria-label="Панель платформы">
-      <button className="workspace-mobile workspace-icon" aria-label={course === "discrete" ? "Открыть меню" : "Меню"} aria-expanded={menu} aria-controls="workspace-nav" onClick={() => setMenu(!menu)}>{menu ? <X size={20} /> : <Menu size={20} />}</button>
+      <button className="workspace-mobile workspace-icon" aria-label={course === "discrete" ? "Открыть меню" : "Меню"} aria-expanded={menu} aria-controls="workspace-nav" onClick={() => { if (focused) toggleFocus(); setMenu(!menu); }}>{menu ? <X size={20} /> : <Menu size={20} />}</button>
       <a className="platform-home" href="#/home"><span className="platform-brand-mark" aria-hidden="true"><GraduationCap size={22} /></span><span className="platform-brand-name">Коллоквиум</span></a>
       <div className="platform-header-links"><button className="study-header-search" onClick={openCommands} aria-label="Поиск по всем курсам"><Search size={17} /><span>Поиск материалов и действий</span><kbd>⌘ K / Ctrl K</kbd></button><a href="#/bookmarks" aria-label="Закладки" title="Закладки"><BookmarkIcon size={18} /><span className="workspace-link-label">Закладки</span></a><button className="workspace-icon" aria-label={focused ? "Выйти из Focus Mode" : "Focus Mode"} aria-pressed={focused} title="Focus Mode · Alt+F" onClick={toggleFocus}>{focused ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button></div>
     </header>
@@ -94,13 +108,13 @@ export function CourseTools({ course }: { course?: CourseId }) {
       </nav>
       <nav className="workspace-courses" aria-label="Курсы"><p className="workspace-nav-group">{course ? "Другие курсы" : "Курсы"}</p>{Object.entries(courses).filter(([id]) => id !== course).map(([id,c]) => <a key={id} title={c.title} href={`#/${id}/${c.start}`} onClick={e => { e.preventDefault(); navigateWorkspace(id as CourseId, c.start); }}><span className="workspace-course-symbol" aria-hidden="true">{id === "calculus" ? "∫" : id === "discrete" ? "⋈" : "⊞"}</span><span>{c.title}</span></a>)}</nav>
       {course && <nav className="workspace-utilities" aria-label="Сервисные разделы">{sectionButtons(true)}</nav>}
-      <div className="workspace-nav-bottom">{course === "discrete" && <SyncBadge onOpen={() => navigateWorkspace("discrete", "sync")} />}<button onClick={toggleDensity} title="Переключить плотность"><Layers size={18} /><span>Плотность интерфейса</span></button><a href="#/mistakes" aria-label="Журнал ошибок"><NotebookPen size={18} /><span>Журнал ошибок</span></a>{course !== "calculus" && <a aria-label="Данные и настройки" href="#/home" onClick={e => { e.preventDefault(); location.hash = "#/home"; setTimeout(() => document.getElementById("backup")?.scrollIntoView(), 100); }}><Settings size={18} /><span>Данные и настройки</span></a>}<span className="workspace-local"><i /><span>Прогресс на устройстве</span></span></div>
+      <div className="workspace-nav-bottom">{course === "discrete" && <SyncBadge onOpen={() => navigateWorkspace("discrete", "sync")} />}<button onClick={toggleDensity} aria-label="Плотность интерфейса" aria-pressed={compact} title={compact ? "Включить комфортную плотность" : "Включить компактную плотность"}><Layers size={18} /><span>Плотность интерфейса<small>{compact ? "Компактная" : "Комфортная"}</small></span></button><a href="#/mistakes" aria-label="Журнал ошибок"><NotebookPen size={18} /><span>Журнал ошибок</span></a>{course !== "calculus" && <a aria-label="Данные и настройки" href="#/settings" aria-current={hash === "#/settings" ? "page" : undefined}><Settings size={18} /><span>Данные и настройки</span></a>}<span className="workspace-local"><i /><span>Прогресс на устройстве</span></span></div>
     </aside>
     <nav className="workspace-mobile-tabs" aria-label="Быстрые переходы">
-      <a href="#/home" aria-label="На главную" aria-current={!course ? "page" : undefined}><Home size={20} /><span>Главная</span></a>
-      <a href={course === "calculus" ? "#/calculus/definition" : course === "discrete" ? "#/discrete/course" : course === "linear" ? "#/linear/study" : "#/search"} aria-label="К материалам"><BookOpen size={20} /><span>Материалы</span></a>
-      <a href={course === "calculus" ? "#/calculus/simulation" : course === "discrete" ? "#/discrete/ticket" : course === "linear" ? "#/linear/exam" : "#/bookmarks"} aria-label="К проверке знаний"><GraduationCap size={21} /><span>{course ? "Проверка" : "Закладки"}</span></a>
-      <a href={course === "calculus" ? "#/calculus/settings" : "#/home"} aria-label="К настройкам"><Settings size={20} /><span>Настройки</span></a>
+      <a href="#/home" aria-label="На главную" aria-current={overview ? "page" : undefined}><Home size={20} /><span>Главная</span></a>
+      <a href={course ? `#/${course}/${materialRoute}` : "#/search"} onClick={event => { if (course) { event.preventDefault(); navigateWorkspace(course, materialRoute); } }} aria-label="К материалам" aria-current={reading ? "page" : undefined}><BookOpen size={20} /><span>Материалы</span></a>
+      <a href={course ? `#/${course}/${examRoute}` : "#/bookmarks"} onClick={event => { if (course) { event.preventDefault(); navigateWorkspace(course, examRoute); } }} aria-label="К проверке знаний" aria-current={checking ? "page" : undefined}><GraduationCap size={21} /><span>{course ? "Проверка" : "Закладки"}</span></a>
+      <a href={course === "calculus" ? "#/calculus/settings" : "#/settings"} aria-label="К настройкам" aria-current={settings ? "page" : undefined}><Settings size={20} /><span>Настройки</span></a>
     </nav>
   </>;
 }
