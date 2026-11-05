@@ -29,7 +29,7 @@ npm run build
 Сборка и проверка для GitHub Pages:
 
 ```sh
-VITE_BASE_PATH=/colloquium-discrete-1module-hseami/ npm run build
+VITE_BASE_PATH=/colloquium/ npm run build
 npm run test:pages
 ```
 

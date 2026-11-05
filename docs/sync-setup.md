@@ -27,7 +27,7 @@
 В **Authentication → URL Configuration** задайте адрес будущего сайта как **Site URL**:
 
 ```text
-https://husteroflife67.github.io/colloquium-discrete-1module-hseami/
+https://husteroflife67.github.io/colloquium/
 ```
 
 Это ожидаемый адрес после включения GitHub Pages, а не подтверждение, что сайт уже опубликован.

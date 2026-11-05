@@ -15,5 +15,5 @@ export function feedbackBody(material: Material, url: string, description: strin
 }
 export function feedbackURL(material: Material, url: string, description: string, quote: string, questionId?: string) {
   const params = new URLSearchParams({ title: `Неточность: ${feedbackContext(material, questionId).title}`.slice(0, 85), body: feedbackBody(material, url, description, quote, questionId) });
-  return `https://github.com/husteroflife67/colloquium-discrete-1module-hseami/issues/new?${params}`;
+  return `https://github.com/husteroflife67/colloquium/issues/new?${params}`;
 }

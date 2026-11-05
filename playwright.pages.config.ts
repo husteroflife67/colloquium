@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 import config from "./playwright.config";
-const prefix = process.env.VITE_BASE_PATH || "/colloquium-discrete-1module-hseami/";
+const prefix = process.env.VITE_BASE_PATH || "/colloquium/";
 export default defineConfig({
   ...config, testDir: "./tests-pages", workers: 1,
   use: { ...config.use, baseURL: `http://127.0.0.1:4173${prefix}` },

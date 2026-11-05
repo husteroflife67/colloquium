@@ -36,7 +36,7 @@ test("production linear course serves sources and exact card routes under the re
   await expect(page.locator('.linear-solution .katex').first()).toBeVisible();
   await page.getByRole('button', { name: 'Условие', exact: true }).click();
   const path = await page.locator('.linear-dialog img').getAttribute('src');
-  expect(new URL(path!, baseURL).pathname).toContain('/colloquium-discrete-1module-hseami/linear/sources/');
+  expect(new URL(path!, baseURL).pathname).toContain('/colloquium/linear/sources/');
   const response = await request.get(new URL(path!, baseURL).href);
   expect(response.ok()).toBe(true);
   expect(response.headers()['content-type']).toContain('image/webp');
