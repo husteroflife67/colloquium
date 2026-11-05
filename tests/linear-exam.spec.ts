@@ -123,3 +123,21 @@ test('a storage failure never starts an unsaved exam or overwrites existing prog
   expect(await page.evaluate(() => localStorage.getItem('linear-exams-v1'))).toBeNull();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('linear-algebra-v1')!).done)).toEqual({ 'П82': true });
 });
+
+test('task navigation keeps condition, notes and the selected number together', async ({ page }) => {
+  await page.goto('/#/linear/exam');
+  await page.getByRole('button', { name: 'Начать · 140 минут' }).click();
+  const first = page.locator('#exam-task-1');
+  await first.getByRole('button', { name: 'Следующее задание' }).click();
+  await expect(page.getByRole('button', { name: 'К заданию 2', exact: true })).toHaveAttribute('aria-current', 'step');
+  const second = page.locator('#exam-task-2');
+  await expect.poll(async () => {
+    const top = (await second.boundingBox())!.y;
+    return top > 100 && top < 300;
+  }).toBe(true);
+  await expect(second.locator('.linear-exam-source')).toHaveAttribute('open', '');
+  await second.getByLabel('Ответ и заметки к № 2', { exact: true }).fill('План решения');
+  await expect(second.getByText('Сохранено на устройстве')).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('Ответ и заметки к № 2', { exact: true })).toHaveValue('План решения');
+});
