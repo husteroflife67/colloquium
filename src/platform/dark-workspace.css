@@ -171,8 +171,9 @@
 .platform-course .linear-page .calc-panel button+button { border-top:1px solid var(--ds-line); }
 .platform-course .linear-page .calc-plan>div button { border:0; border-top:1px solid var(--ds-line); border-radius:0; background:transparent; }
 .platform-course .linear-page .unified-next .overview-continue { background:var(--ds-action); color:white; }
-.platform-course .linear-page:has(.linear-exam-task)>.linear-back,
-.platform-course .linear-page:has(.linear-exam-task)>.linear-topics { display:none; }
+ .platform-course .linear-page:has(.linear-exam-task)>.linear-back { margin:0 0 8px; font-size:13px; }
+.platform-course .linear-page:has(.linear-exam-task)>.linear-topics { margin:8px 0; padding:0; background:transparent; border:0; }
+.platform-course .linear-page:has(.linear-exam-task) .linear-exam-heading { margin-top:8px; }
 .platform-course .linear-exam-heading { margin-bottom:16px; }
 .platform-course .linear-exam-heading h1 { font-size:28px; }
 .platform-course .linear-exam-task header { margin-bottom:14px; padding-bottom:12px; }
@@ -180,3 +181,14 @@
 .platform-course .linear-exam-source { padding:0; }
 .platform-course .linear-exam-source summary { padding:10px 14px; }
 .platform-course .linear-exam-source img { min-height:160px; }
+.platform-course .practice-intro { padding:18px 0; margin:20px 0; background:transparent; border:0; border-block:1px solid var(--ds-line); border-radius:0; }
+.platform-course .practice-intro .hero-label { display:none; }
+.platform-course .practice-intro h2 { font-size:20px; }
+.platform-course .practice-intro h2 em { font-family:inherit; font-style:normal; }
+.platform-course .practice-intro p { font-size:14px; }
+.platform-course .practice-numbers strong { font-size:24px; }
+.platform-course .unified-overview .calc-panel .calc-task { display:flex; align-items:center; text-align:left; }
+.platform-course .unified-overview .calc-task span { min-width:0; }
+.platform-course .unified-overview .calc-task small { color:var(--ds-muted); }
+.platform-course .unified-overview .unified-plan-link { display:inline-flex; align-items:center; gap:8px; }
+.platform-course .settings-grid { align-items:start; }
