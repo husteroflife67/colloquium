@@ -112,7 +112,7 @@ export class SyncEngine {
     document.addEventListener("visibilitychange", this.onVisible);
     this.interval = setInterval(() => {
       if (document.visibilityState === "visible") void this.sync();
-    }, 10000);
+    }, 180000);
   }
   stop() {
     this.started = false;
@@ -135,7 +135,7 @@ export class SyncEngine {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       void this.sync();
-    }, 350);
+    }, 400);
   }
   private onWrite = (event: CustomEvent<ProgressWrite>) => {
     if (!this.keys.includes(event.detail.key as LocalKey) || !this.healthy) return;

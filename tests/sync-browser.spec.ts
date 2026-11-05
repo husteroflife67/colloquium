@@ -560,3 +560,28 @@ test("calculus sync merges independent fields on two devices, preserves discrete
   expect(cloud.rows(u1).has("rating/def-bounds")).toBe(false);
   await a.context.close(); await b.context.close();
 });
+
+test("background cloud checks use a three-minute interval while local edits remain immediate", async ({ browser }) => {
+  const cloud = new Cloud();
+  const a = await device(browser, cloud);
+  try {
+    await a.page.clock.install();
+    let requests = 0;
+    a.page.on("request", request => { if (request.url().includes("/rpc/sync_study_progress")) requests++; });
+    await a.page.reload();
+    await expect.poll(() => requests).toBeGreaterThan(0);
+    await a.page.clock.runFor(1000);
+    const initial = requests;
+    await a.page.clock.runFor(10000);
+    expect(requests).toBe(initial);
+    await a.page.clock.runFor(170000);
+    await expect.poll(() => requests).toBeGreaterThan(initial);
+    const beforeEdit = requests;
+    await a.page.getByLabel("Статус вопроса 1", { exact: true }).selectOption("known");
+    expect(await a.page.evaluate(() => JSON.parse(localStorage.getItem("discrete-study-v1")!).progress["1"].status)).toBe("known");
+    await a.page.clock.runFor(300);
+    expect(requests).toBe(beforeEdit);
+    await a.page.clock.runFor(200);
+    await expect.poll(() => cloud.rows(u1).get("theory/1")?.value.status).toBe("known");
+  } finally { await a.context.close(); }
+});
