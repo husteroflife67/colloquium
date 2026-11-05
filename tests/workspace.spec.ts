@@ -79,3 +79,36 @@ test("first paint uses dark native controls even before JavaScript in a light sy
   await expect(root).toHaveCSS("background-color", "rgb(13, 15, 20)");
   await context.close();
 });
+
+test("command clicks reset the current section and full search preserves its filters", async ({ page }) => {
+  await page.goto("/#/calculus/definition?item=def-completeness");
+  await expect(page.locator(".reading")).toBeVisible();
+  await page.getByRole("button", { name: "Поиск по всем курсам" }).click();
+  await page.locator(".command-panel").getByRole("link", { name: "Определения · Математический анализ", exact: false }).click();
+  await expect(page.locator(".reading")).toHaveCount(0);
+  await expect(page.locator(".library-card").first()).toBeVisible();
+  await page.getByRole("button", { name: "Поиск по всем курсам" }).click();
+  await page.getByLabel("Поиск по всем материалам").fill("предел");
+  await page.getByLabel("Курс поиска", { exact: true }).selectOption("calculus");
+  await page.getByLabel("Вид материала поиска").selectOption("definition");
+  await page.getByRole("link", { name: "Полный поиск" }).click();
+  await expect(page).toHaveURL(/q=.*&course=calculus&kind=definition/);
+  await expect(page.locator(".study-result").first()).toBeVisible();
+});
+
+test("command dialog keeps keyboard focus when opened over the mobile drawer", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#/calculus/dashboard");
+  const menu = page.getByRole("button", { name: "Меню", exact: true });
+  await menu.click();
+  await page.getByRole("button", { name: "Поиск по всем курсам" }).click();
+  await expect(page.getByLabel("Поиск по всем материалам")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Закрыть поиск", exact: true })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".command-panel")).toHaveCount(0);
+  await expect(menu).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(menu).toBeFocused();
+});

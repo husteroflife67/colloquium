@@ -48,7 +48,7 @@ export function CourseTools({ course }: { course?: CourseId }) {
     const update = () => { setHash(location.hash); setMenu(false); };
     const focus = () => setFocused(document.documentElement.dataset.focus === "true");
     window.addEventListener("hashchange", update); window.addEventListener("workspace-focus", focus);
-    const escape = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
+    const escape = (e: KeyboardEvent) => { if (e.key === "Escape" && !document.querySelector("dialog[open]")) setMenu(false); };
     window.addEventListener("keydown", escape);
     return () => { window.removeEventListener("hashchange", update); window.removeEventListener("workspace-focus", focus); window.removeEventListener("keydown", escape); };
   }, []);
@@ -60,7 +60,7 @@ export function CourseTools({ course }: { course?: CourseId }) {
     document.body.style.overflow = "hidden";
     document.querySelector<HTMLButtonElement>('#workspace-nav nav button')?.focus();
     const trap = (event: KeyboardEvent) => {
-      if (event.key !== "Tab") return;
+      if (event.key !== "Tab" || document.querySelector("dialog[open]")) return;
       const targets = [...document.querySelectorAll<HTMLElement>('#workspace-nav a, #workspace-nav button, .workspace-mobile')].filter(element => element.getClientRects().length && getComputedStyle(element).visibility !== "hidden");
       const index = targets.indexOf(document.activeElement as HTMLElement);
       if (event.shiftKey && index <= 0) { event.preventDefault(); targets.at(-1)?.focus(); }

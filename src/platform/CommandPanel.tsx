@@ -53,6 +53,10 @@ export function CommandPanel() {
     ...(search?.run(query, course, kind).slice(0, 16).map(m => ({ id: m.key, title: m.title, detail: `${courses[m.material.course].title} · ${m.topic}`, href: m.href })) ?? []),
   ] : actions;
   function execute(entry: Entry) { close(); if (entry.href) { const match = entry.href.match(/^#\/(calculus|discrete|linear)\/([a-z]+)$/); if (match) navigateWorkspace(match[1] as CourseId, match[2]); else location.hash = entry.href; } else entry.action?.(); }
+  const fullSearch = new URLSearchParams();
+  if (query.trim()) fullSearch.set("q", query.trim());
+  if (course !== "all") fullSearch.set("course", course);
+  if (kind !== "all") fullSearch.set("kind", kind);
   if (!open) return null;
   return <dialog ref={dialog} className="command-panel" aria-labelledby="command-title" onCancel={e => { e.preventDefault(); close(); }} onClick={e => { if (e.target === dialog.current) close(); }}>
     <div className="command-search"><Search size={21} /><label className="sr-only" id="command-title" htmlFor="command-input">Материалы и действия</label><input id="command-input" ref={input} aria-label="Поиск по всем материалам" role="combobox" aria-expanded={open} aria-controls="command-results" aria-autocomplete="list" aria-activedescendant={entries[active] ? `command-${active}` : undefined} placeholder="Найти материал или действие…" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => {
@@ -60,8 +64,12 @@ export function CommandPanel() {
       if (e.key === "Enter" && entries[active]) { e.preventDefault(); execute(entries[active]); }
     }} /><button className="workspace-icon" aria-label="Закрыть поиск" onClick={close}><X size={19} /></button></div>
     <div className="command-filters"><label>Курс<select aria-label="Курс поиска" value={course} onChange={e => setCourse(e.target.value as typeof course)}><option value="all">Все курсы</option>{Object.entries(courses).map(([id,c]) => <option key={id} value={id}>{c.title}</option>)}</select></label><label>Материал<select aria-label="Вид материала поиска" value={kind} onChange={e => setKind(e.target.value as typeof kind)}><option value="all">Все виды</option><option value="definition">Определения</option><option value="theory">Теория и доказательства</option><option value="practice">Практика</option><option value="oral">Уточняющие вопросы</option></select></label></div>
-    <div id="command-results" className="command-results" role="listbox" aria-label="Результаты поиска">{entries.map((entry,i) => <div id={`command-${i}`} key={entry.id} className={`study-result command-result ${active === i ? "is-selected" : ""}`} role="option" aria-selected={active === i} onMouseMove={() => setActive(i)}>{entry.href ? <a href={entry.href} onClick={close}><span><MathText text={entry.title} /><small>{entry.detail}</small></span><ArrowUpRight size={16} /></a> : <button onClick={() => execute(entry)}><span>{entry.title}<small>{entry.detail}</small></span><Command size={16} /></button>}</div>)}</div>
+    <div id="command-results" className="command-results" role="listbox" aria-label="Результаты поиска">{entries.map((entry,i) => <div id={`command-${i}`} key={entry.id} className={`study-result command-result ${active === i ? "is-selected" : ""}`} role="option" aria-selected={active === i} onMouseMove={() => setActive(i)}>{entry.href ? <a href={entry.href} onClick={event => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      execute(entry);
+    }}><span><MathText text={entry.title} /><small>{entry.detail}</small></span><ArrowUpRight size={16} /></a> : <button onClick={() => execute(entry)}><span>{entry.title}<small>{entry.detail}</small></span><Command size={16} /></button>}</div>)}</div>
     {!entries.length && <p className="command-empty" role="status">{error ? "Поиск не загрузился. Откройте полный поиск или обновите страницу." : !search ? "Загружаем поиск…" : "Ничего не найдено. Попробуйте другое слово или смените фильтры."}</p>}
-    <footer><span><kbd>↑</kbd><kbd>↓</kbd> выбрать · <kbd>Enter</kbd> открыть · <kbd>Esc</kbd> закрыть</span><a href={`#/search${query ? `?q=${encodeURIComponent(query)}` : ""}`} onClick={close}>Полный поиск ↗</a></footer>
+    <footer><span><kbd>↑</kbd><kbd>↓</kbd> выбрать · <kbd>Enter</kbd> открыть · <kbd>Esc</kbd> закрыть</span><a href={`#/search${fullSearch.size ? `?${fullSearch}` : ""}`} onClick={close}>Полный поиск ↗</a></footer>
   </dialog>;
 }
